@@ -33,7 +33,7 @@ export const BackendStatus: React.FC<Props> = ({ onRetry, showRetryButton = true
       setBackendStatus('checking');
       for (const p of paths) {
         try {
-          const res = await fetch(`${base}${p}`, { method: 'GET', credentials: 'include' });
+          const res = await fetch(`${base}${p}`, { method: 'GET', credentials: 'omit' });
           if (res.ok || res.status === 401 || res.status === 403) {
             setBackendStatus('online');
             return;
