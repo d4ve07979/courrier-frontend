@@ -1,0 +1,662 @@
+/* ============================================
+   THÈME BLANC ET VERT - Override automatique
+   ============================================
+   Ce fichier remplace automatiquement les couleurs
+   sombres par des couleurs claires sans modifier
+   la logique des composants. (Fichier de surcharge CSS)
+   ============================================ */
+
+/* Backgrounds sombres -> Backgrounds clairs */
+.bg-slate-900,
+.bg-slate-800,
+.bg-slate-700 {
+  background-color: #ffffff !important;
+}
+
+.bg-slate-800\/50,
+.bg-slate-800\/30 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.bg-slate-700\/50,
+.bg-slate-700\/30 {
+  background-color: rgba(249, 250, 251, 0.95) !important;
+}
+
+/* Gradients sombres -> Gradients clairs avec vert */
+.bg-gradient-to-br.from-slate-900 {
+  background-image: linear-gradient(to bottom right, #f9fafb, #dcfce7, #f9fafb) !important;
+}
+
+.from-slate-900.via-purple-900.to-slate-900 {
+  background-image: linear-gradient(to bottom right, #ffffff, #dcfce7, #ffffff) !important;
+}
+
+/* Borders sombres -> Borders claires */
+.border-slate-700,
+.border-slate-600 {
+  border-color: #e5e7eb !important;
+}
+
+/* Textes clairs -> Textes sombres */
+.text-white {
+  color: #111827 !important;
+}
+
+.text-slate-300,
+.text-slate-400 {
+  color: #4b5563 !important;
+}
+
+.text-slate-500 {
+  color: #6b7280 !important;
+}
+
+/* Purple -> Green */
+.bg-purple-500,
+.bg-purple-600 {
+  background-color: #22c55e !important;
+}
+
+.bg-purple-500\/20 {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.bg-purple-500\/10 {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+.text-purple-400,
+.text-purple-300,
+.text-purple-500 {
+  color: #16a34a !important;
+}
+
+.border-purple-500,
+.border-purple-500\/30,
+.border-purple-500\/50 {
+  border-color: #22c55e !important;
+}
+
+.hover\:bg-purple-500:hover,
+.hover\:bg-purple-600:hover {
+  background-color: #16a34a !important;
+}
+
+.hover\:text-purple-300:hover,
+.hover\:text-purple-400:hover {
+  color: #15803d !important;
+}
+
+.focus\:border-purple-500:focus {
+  border-color: #22c55e !important;
+}
+
+.focus\:ring-purple-500:focus {
+  --tw-ring-color: #22c55e !important;
+}
+
+.focus\:ring-purple-500\/20:focus,
+.focus\:ring-purple-500\/50:focus {
+  --tw-ring-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+/* Gradients purple/pink -> green */
+.from-purple-500,
+.from-purple-600 {
+  --tw-gradient-from: #22c55e !important;
+}
+
+.to-pink-500,
+.to-pink-600,
+.to-purple-600 {
+  --tw-gradient-to: #16a34a !important;
+}
+
+.from-purple-500\/20,
+.from-purple-600\/20 {
+  --tw-gradient-from: rgba(34, 197, 94, 0.2) !important;
+}
+
+.to-purple-600\/20,
+.to-pink-500\/20 {
+  --tw-gradient-to: rgba(22, 163, 74, 0.2) !important;
+}
+
+/* Hover effects pour purple -> green */
+.hover\:bg-purple-500\/20:hover,
+.hover\:bg-purple-500\/30:hover {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.hover\:from-purple-600:hover {
+  --tw-gradient-from: #16a34a !important;
+}
+
+.hover\:to-pink-600:hover {
+  --tw-gradient-to: #15803d !important;
+}
+
+/* Backgrounds avec opacité */
+.bg-slate-900\/50 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Hover backgrounds */
+.hover\:bg-slate-700:hover,
+.hover\:bg-slate-600:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.hover\:bg-slate-700\/50:hover {
+  background-color: rgba(243, 244, 246, 0.8) !important;
+}
+
+/* Placeholder colors */
+.placeholder-slate-400::placeholder,
+.placeholder-slate-500::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Ring colors */
+.ring-purple-500 {
+  --tw-ring-color: #22c55e !important;
+}
+
+/* Backdrop blur backgrounds */
+.backdrop-blur-sm,
+.backdrop-blur-xl {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Shadows - Ajuster pour le thème clair */
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Disabled states */
+.disabled\:bg-purple-800:disabled {
+  background-color: #d1d5db !important;
+}
+
+.disabled\:bg-slate-800:disabled {
+  background-color: #f3f4f6 !important;
+}
+
+/* Animations - Ajuster les couleurs des blobs */
+.animate-blob {
+  filter: blur(40px) !important;
+}
+
+/* Inputs et selects */
+input[type="text"],
+input[type="password"],
+input[type="date"],
+select {
+  background-color: #f9fafb !important;
+  border-color: #e5e7eb !important;
+  color: #111827 !important;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+select:focus {
+  border-color: #22c55e !important;
+  background-color: #ffffff !important;
+}
+
+/* Buttons */
+button {
+  transition: all 0.2s ease !important;
+}
+
+/* Cards hover effect */
+.hover\:border-purple-500\/50:hover {
+  border-color: rgba(34, 197, 94, 0.5) !important;
+}
+
+/* Status badges - Garder les couleurs d'origine pour la lisibilité */
+.bg-orange-500,
+.bg-orange-500\/20 {
+  background-color: rgba(249, 115, 22, 0.2) !important;
+}
+
+.border-orange-500,
+.border-orange-500\/30 {
+  border-color: rgba(249, 115, 22, 0.3) !important;
+}
+
+.text-orange-400 {
+  color: #f97316 !important;
+}
+
+.bg-green-500,
+.bg-green-500\/20 {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.border-green-500,
+.border-green-500\/30 {
+  border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+.text-green-400 {
+  color: #22c55e !important;
+}
+
+.bg-blue-500,
+.bg-blue-500\/20 {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.border-blue-500,
+.border-blue-500\/30 {
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.text-blue-400 {
+  color: #3b82f6 !important;
+}
+
+.bg-red-500\/10 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.border-red-500\/30 {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.text-red-400 {
+  color: #ef4444 !important;
+}
+
+.bg-yellow-500\/20 {
+  background-color: rgba(234, 179, 8, 0.2) !important;
+}
+
+.border-yellow-500\/50 {
+  border-color: rgba(234, 179, 8, 0.5) !important;
+}
+
+.text-yellow-400 {
+  color: #eab308 !important;
+}
+
+/* Notifications et alertes */
+.bg-slate-600 {
+  background-color: #d1d5db !important;
+}
+
+/* Avatar backgrounds */
+.bg-purple-500 {
+  background-color: #22c55e !important;
+}
+
+/* Loader spinner */
+.border-purple-500 {
+  border-color: #22c55e !important;
+}
+
+/* Icons colors */
+.text-slate-400 {
+  color: #6b7280 !important;
+}
+
+/* Hover text colors */
+.hover\:text-white:hover {
+  color: #111827 !important;
+}
+
+/* Group hover effects */
+.group:hover .group-hover\:text-white {
+  color: #111827 !important;
+}
+
+/* Active states */
+.bg-purple-500\/20 {
+  background-color: rgba(34, 197, 94, 0.15) !important;
+}
+
+/* Mix blend mode adjustments */
+.mix-blend-multiply {
+  mix-blend-mode: normal !important;
+}
+
+/* Opacity adjustments for light theme */
+.opacity-20 {
+  opacity: 0.4 !important;
+}
+
+.opacity-50 {
+  opacity: 0.7 !important;
+}
+
+/* ============================================
+   CORRECTIONS SUPPLÉMENTAIRES 
+   ============================================ */
+
+/* Tables */
+thead.bg-slate-700\/50 {
+  background-color: #f3f4f6 !important;
+}
+
+tbody tr.hover\:bg-slate-700\/30:hover {
+  background-color: rgba(243, 244, 246, 0.5) !important;
+}
+
+/* Text colors spécifiques */
+.text-slate-300 {
+  color: #374151 !important;
+}
+
+/* Hover border effects */
+.hover\:border-purple-500:hover {
+  border-color: #22c55e !important;
+}
+
+/* Focus ring effects */
+.focus\:ring-2:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
+/* Disabled opacity */
+.disabled\:opacity-50:disabled {
+  opacity: 0.5 !important;
+}
+
+/* Cursor styles */
+.disabled\:cursor-not-allowed:disabled {
+  cursor: not-allowed !important;
+}
+
+/* Toggle switches - Garder le vert pour l'état actif */
+button.bg-purple-500 {
+  background-color: #22c55e !important;
+}
+
+button.bg-slate-600 {
+  background-color: #d1d5db !important;
+}
+
+/* Animated blobs pour le fond */
+.animate-blob {
+  background: rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Specific gradient overrides */
+.bg-gradient-to-r.from-purple-500.to-pink-500 {
+  background-image: linear-gradient(to right, #22c55e, #16a34a) !important;
+}
+
+.hover\:from-purple-600.hover\:to-pink-600:hover {
+  background-image: linear-gradient(to right, #16a34a, #15803d) !important;
+}
+
+/* Border colors for cards */
+.border-slate-700 {
+  border-color: #e5e7eb !important;
+}
+
+.border-slate-600 {
+  border-color: #d1d5db !important;
+}
+
+/* Specific icon colors */
+.text-green-400 {
+  color: #22c55e !important;
+}
+
+/* Hover effects for buttons */
+.hover\:bg-slate-600:hover {
+  background-color: #e5e7eb !important;
+}
+
+/* Ring offset colors */
+.focus\:ring-offset-2:focus {
+  --tw-ring-offset-width: 2px;
+}
+
+/* Specific background for inputs */
+.bg-slate-700 {
+  background-color: #f9fafb !important;
+}
+
+.bg-slate-900\/50 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Hover states for inputs */
+.hover\:bg-slate-700:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Border focus states */
+.focus\:border-purple-500:focus {
+  border-color: #22c55e !important;
+}
+
+/* Specific text colors for labels */
+label.text-slate-400 {
+  color: #6b7280 !important;
+}
+
+/* Specific background for modals/dropdowns */
+.bg-slate-800 {
+  background-color: #ffffff !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Hover effects for menu items */
+.hover\:bg-purple-500\/20:hover {
+  background-color: rgba(34, 197, 94, 0.15) !important;
+}
+
+/* Active menu items */
+.bg-purple-500\/20.text-white {
+  background-color: rgba(34, 197, 94, 0.15) !important;
+  color: #111827 !important;
+}
+
+/* Notification dot */
+.bg-red-500 {
+  background-color: #ef4444 !important;
+}
+
+/* Avatar backgrounds */
+.bg-purple-500 {
+  background-color: #22c55e !important;
+}
+
+/* Specific gradient backgrounds for stat cards */
+.from-blue-500\/20.to-blue-600\/20 {
+  background-image: linear-gradient(to bottom right, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.15)) !important;
+}
+
+.from-green-500\/20.to-green-600\/20 {
+  background-image: linear-gradient(to bottom right, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.15)) !important;
+}
+
+.from-orange-500\/20.to-orange-600\/20 {
+  background-image: linear-gradient(to bottom right, rgba(249, 115, 22, 0.15), rgba(234, 88, 12, 0.15)) !important;
+}
+
+/* Border colors for stat cards */
+.border-blue-500\/30 {
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.border-green-500\/30 {
+  border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+.border-orange-500\/30 {
+  border-color: rgba(249, 115, 22, 0.3) !important;
+}
+
+.border-purple-500\/30 {
+  border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Specific hover scale effect */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+/* Transition all */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Specific colors for icons in stat cards */
+.text-blue-400 {
+  color: #3b82f6 !important;
+}
+
+/* Loader spinner colors */
+.border-t-2.border-b-2.border-purple-500 {
+  border-top-color: #22c55e !important;
+  border-bottom-color: #22c55e !important;
+}
+
+.border-t-2.border-b-2.border-white {
+  border-top-color: #ffffff !important;
+  border-bottom-color: #ffffff !important;
+}
+
+/* Specific background for search results */
+.absolute.bg-slate-800 {
+  background-color: #ffffff !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Hover effects for search results */
+.hover\:bg-slate-700\/50:hover {
+  background-color: rgba(243, 244, 246, 0.8) !important;
+}
+
+/* Specific text colors for search */
+.text-slate-500 {
+  color: #6b7280 !important;
+}
+
+/* Font mono for references */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Specific padding and spacing - no override needed */
+
+/* Animation spin */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pulse animation for loader */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Specific for notification badges */
+.bg-purple-500\/20.text-purple-400 {
+  background-color: rgba(34, 197, 94, 0.15) !important;
+  color: #16a34a !important;
+}
+
+/* Specific for toggle button white dot */
+.bg-white {
+  background-color: #ffffff !important;
+}
+
+/* Translate utilities */
+.translate-x-1 {
+  transform: translateX(0.25rem);
+}
+
+.translate-x-6 {
+  transform: translateX(1.5rem);
+}
+
+/* Rounded utilities */
+.rounded-full {
+  border-radius: 9999px;
+}
+
+/* Specific for login page background blobs */
+.filter.blur-3xl {
+  filter: blur(64px);
+}
+
+.filter.blur-2xl {
+  filter: blur(40px);
+}
+
+/* Mix blend for blobs */
+.mix-blend-multiply {
+  mix-blend-mode: normal !important;
+  opacity: 0.3 !important;
+}
+
+/* Specific gradient for login background */
+.from-slate-900.via-purple-900.to-slate-900 {
+  background-image: linear-gradient(to bottom right, #f9fafb, #dcfce7, #f9fafb) !important;
+}
+
+/* Backdrop blur */
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Specific for notification component */
+.from-green-500\/20 {
+  --tw-gradient-from: rgba(34, 197, 94, 0.2) !important;
+}
+
+.from-red-500\/20 {
+  --tw-gradient-from: rgba(239, 68, 68, 0.2) !important;
+}
+
+.from-orange-500\/20 {
+  --tw-gradient-from: rgba(249, 115, 22, 0.2) !important;
+}
+
+.from-blue-500\/20 {
+  --tw-gradient-from: rgba(59, 130, 246, 0.2) !important;
+}

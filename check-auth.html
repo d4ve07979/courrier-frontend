@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Auth</title>
+</head>
+<body>
+    <h1>État de l'authentification</h1>
+    <div id="result"></div>
+    
+    <script>
+        const token = localStorage.getItem('token');
+        const accessToken = localStorage.getItem('access_token');
+        const user = localStorage.getItem('user');
+        
+        const result = document.getElementById('result');
+        result.innerHTML = `
+            <p><strong>Token:</strong> ${token ? 'Présent (' + token.substring(0, 50) + '...)' : 'Absent'}</p>
+            <p><strong>Access Token:</strong> ${accessToken ? 'Présent (' + accessToken.substring(0, 50) + '...)' : 'Absent'}</p>
+            <p><strong>User:</strong> ${user || 'Absent'}</p>
+            <hr>
+            <p>Si aucun token n'est présent, vous devez vous connecter d'abord.</p>
+            <p><a href="/login">Aller à la page de connexion</a></p>
+        `;
+    </script>
+</body>
+</html>
