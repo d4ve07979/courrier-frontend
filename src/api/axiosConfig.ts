@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8097
 export const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000, // 30 secondes au lieu de 10
-  withCredentials: true,
+  withCredentials: false,
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN',
   headers: {
