@@ -1,7 +1,6 @@
 export const API_CONFIG = {
-  // Forcer l'utilisation des données réelles du backend
   useMockData: false,
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8089/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8097',
   timeout: 10000,
 };
 
