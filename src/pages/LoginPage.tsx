@@ -1,70 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, Loader2, Shield } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../auth/useAuth';
-
-// Import de l'image du logo (à placer dans src/assets ou public)
-import logoInseed from '../assets/logo-inseed-officiel.jpg'; // À adapter selon le chemin réel
+import logoInseed from '../assets/logo-inseed-officiel.jpg';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login, isAuthenticated, loading: authLoading } = useAuth();
 
-  const [formData, setFormData] = useState({
-    email: '',
-    motDePasse: '',
-  });
-
+  const [formData, setFormData] = useState({ email: '', motDePasse: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mounted, setMounted] = useState(false);
 
-  // Redirection automatique si déjà connecté
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log('✅ Déjà connecté, redirection vers /dashboard');
-      navigate('/dashboard', { replace: true });
-    }
+    setMounted(true);
+    if (isAuthenticated) navigate('/dashboard', { replace: true });
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
-      console.log('🔄 Tentative de connexion avec:', { 
-        email: formData.email,
-        backendUrl: 'http://localhost:8097'
-      });
-
       const response = await login(formData);
-
       if (response.success && response.access_token) {
-        console.log('✅ Connexion réussie');
-        console.log('👤 Utilisateur connecté:', response.utilisateur);
-        
         await new Promise(resolve => setTimeout(resolve, 100));
-        
         navigate('/dashboard', { replace: true });
       } else {
-        const errorMsg = response.message || 'Échec de la connexion';
-        setError(errorMsg);
-        console.error('❌ Erreur de connexion:', errorMsg);
+        setError(response.message || 'Échec de la connexion');
       }
     } catch (err: any) {
-      console.error('❌ Erreur lors de la connexion:', err);
-      
       let errorMessage = 'Identifiants incorrects';
-      
-      if (err.message) {
-        errorMessage = err.message;
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.code === 'ERR_NETWORK') {
-        errorMessage = 'Impossible de se connecter au serveur. Vérifiez que le backend Spring Boot est démarré sur le port 8089.';
-      }
-      
+      if (err.message) errorMessage = err.message;
+      else if (err.response?.data?.message) errorMessage = err.response.data.message;
+      else if (err.code === 'ERR_NETWORK') errorMessage = 'Serveur inaccessible. Veuillez réessayer.';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -73,11 +44,11 @@ export const LoginPage: React.FC = () => {
 
   if (authLoading || isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-yellow-50 to-red-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-700 font-medium">
-            {isAuthenticated ? 'Redirection vers le tableau de bord...' : 'Vérification de l\'authentification...'}
+      <div style={styles.loadingScreen}>
+        <div style={styles.loadingContent}>
+          <div style={styles.spinner} />
+          <p style={styles.loadingText}>
+            {isAuthenticated ? 'Redirection…' : 'Vérification en cours…'}
           </p>
         </div>
       </div>
@@ -85,208 +56,554 @@ export const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-yellow-50 to-red-50 flex items-center justify-center p-4">
-      {/* Motif de fond avec couleurs togolaises */}
-      <div className="absolute inset-0 overflow-hidden opacity-10">
-        <div className="absolute top-0 left-0 w-full h-1/3 bg-green-600"></div>
-        <div className="absolute top-1/3 left-0 w-full h-1/3 bg-yellow-400"></div>
-        <div className="absolute top-2/3 left-0 w-full h-1/3 bg-red-600"></div>
-      </div>
+    <div style={styles.root}>
+      {/* Panneau gauche */}
+      <div style={{ ...styles.leftPanel, opacity: mounted ? 1 : 0, transform: mounted ? 'translateX(0)' : 'translateX(-24px)', transition: 'all 0.7s ease' }}>
+        {/* Bande décorative verticale */}
+        <div style={styles.accentBar} />
 
-      <div className="relative w-full max-w-5xl">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          {/* Section gauche - Branding INSEED */}
-          <div className="hidden md:block text-center space-y-6">
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-green-600">
-              {/* Logo officiel INSEED + République Togolaise */}
-              <div className="mb-8">
-                <div className="inline-block bg-white rounded-2xl shadow-2xl p-6 border-4 border-green-600">
-                  <img 
-                    src={logoInseed} 
-                    alt="Logo officiel INSEED - République Togolaise" 
-                    className="w-96 max-w-full h-auto object-contain"
-                  />
-                </div>
-              </div>
-
-              <h1 className="text-3xl font-bold text-green-800 mb-2">Système de Gestion de courrier INSEED</h1>
-              <p className="text-gray-700 font-medium">Institut National de la Statistique</p>
-              <p className="text-gray-700 font-medium">et des Études Économiques</p>
-              <p className="text-gray-700 font-medium">et Démographiques</p>
-
-              {/* Armoiries simplifiées (conservées pour le style) */}
-              <div className="flex items-center justify-center my-8">
-                <div className="w-24 h-24 bg-gradient-to-br from-green-700 to-green-900 rounded-full flex items-center justify-center shadow-lg">
-                  <Shield className="w-12 h-12 text-yellow-400" />
-                </div>
-              </div>
-
-              <div className="space-y-3 text-left bg-white/50 rounded-lg p-4">
-                <div className="flex items-center gap-3 text-gray-700">
-                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                  <span className="font-medium">Gestion des courriers</span>
-                </div>
-                <div className="flex items-center gap-3 text-gray-700">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span className="font-medium">Suivi en temps réel</span>
-                </div>
-                <div className="flex items-center gap-3 text-gray-700">
-                  <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-                  <span className="font-medium">Traçabilité complète</span>
-                </div>
-              </div>
-            </div>
-
-          {/*<div className="text-center space-y-2 bg-white/60 rounded-lg p-4">
-              <p className="text-sm font-semibold text-gray-700">République Togolaise</p>
-              <p className="text-xs text-gray-600 italic font-medium">"Travail - Liberté - Patrie"</p>
-            </div>*/}
+        <div style={styles.leftContent}>
+          {/* Badge République */}
+          <div style={styles.republicBadge}>
+            <span style={styles.republicText}>RÉPUBLIQUE TOGOLAISE</span>
+            <span style={styles.republicDivider}>·</span>
+            <span style={styles.republicMotto}>Travail — Liberté — Patrie</span>
           </div>
 
-          {/* Section droite - Formulaire de connexion */}
-          <div className="w-full">
-            {/* Header mobile avec le logo officiel */}
-            <div className="md:hidden text-center mb-8">
-              <div className="inline-block bg-white rounded-2xl shadow-2xl p-5 border-4 border-green-600">
-                <img 
-                  src={logoInseed} 
-                  alt="Logo officiel INSEED - République Togolaise" 
-                  className="w-72 max-w-full h-auto object-contain"
+          {/* Logo */}
+          <div style={styles.logoWrapper}>
+            <img src={logoInseed} alt="INSEED" style={styles.logo} />
+          </div>
+
+          {/* Titre institution */}
+          <div style={styles.institutionBlock}>
+            <h1 style={styles.institutionName}>INSEED</h1>
+            <p style={styles.institutionFull}>
+              Institut National de la Statistique<br />
+              et des Études Économiques et Démographiques
+            </p>
+          </div>
+
+          {/* Séparateur */}
+          <div style={styles.divider} />
+
+          {/* Titre système */}
+          <div style={styles.systemBlock}>
+            <p style={styles.systemLabel}>SYSTÈME DE</p>
+            <h2 style={styles.systemTitle}>Gestion des Courriers</h2>
+          </div>
+
+          {/* Features */}
+          <div style={styles.features}>
+            {[
+              { icon: '📬', label: 'Gestion des courriers entrants et sortants' },
+              { icon: '📡', label: 'Suivi et traçabilité en temps réel' },
+              { icon: '🔒', label: 'Sécurité et confidentialité des données' },
+            ].map((f, i) => (
+              <div key={i} style={{ ...styles.feature, animationDelay: `${0.2 + i * 0.1}s` }}>
+                <span style={styles.featureIcon}>{f.icon}</span>
+                <span style={styles.featureLabel}>{f.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Pied de page gauche */}
+          <div style={styles.leftFooter}>
+            <p style={styles.leftFooterText}>© 2025 INSEED · Tous droits réservés</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Panneau droit */}
+      <div style={{ ...styles.rightPanel, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.7s ease 0.15s' }}>
+        <div style={styles.formCard}>
+          {/* En-tête formulaire */}
+          <div style={styles.formHeader}>
+            <div style={styles.formHeaderAccent} />
+            <div>
+              <h2 style={styles.formTitle}>Connexion</h2>
+              <p style={styles.formSubtitle}>Accédez à votre espace de travail</p>
+            </div>
+          </div>
+
+          {/* Formulaire */}
+          <form onSubmit={handleSubmit} style={styles.form} autoComplete="on">
+            {/* Email */}
+            <div style={styles.fieldGroup}>
+              <label style={styles.label}>Adresse email</label>
+              <div style={styles.inputWrapper}>
+                <Mail size={16} style={styles.inputIcon} />
+                <input
+                  type="email"
+                  autoComplete="email"
+                  placeholder="prenom.nom@inseed.tg"
+                  value={formData.email}
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  disabled={loading}
+                  style={styles.input}
+                  onFocus={e => Object.assign(e.target.style, styles.inputFocus)}
+                  onBlur={e => Object.assign(e.target.style, { borderColor: '#d1d5db', boxShadow: 'none' })}
                 />
               </div>
-              <h1 className="text-2xl font-bold text-green-800 mt-4 mb-1">INSEED</h1>
-              <p className="text-sm text-gray-700 font-medium">Gestion des Courriers</p>
             </div>
 
-            {/* Formulaire */}
-            <div className="bg-white/95 backdrop-blur-xl border-2 border-green-600 rounded-2xl p-8 shadow-2xl">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Connexion</h2>
-                <p className="text-gray-600">Accédez à votre espace de travail</p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-5" autoComplete="on">
-                {/* Email */}
-                <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Adresse email professionnelle
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-600" />
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
-                      placeholder="prenom.nom@inseed.tg"
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                </div>
-
-                {/* Mot de passe */}
-                <div>
-                  <label htmlFor="motDePasse" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Mot de passe
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-600" />
-                    <input
-                      id="motDePasse"
-                      name="motDePasse"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      value={formData.motDePasse}
-                      onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })}
-                      className="w-full pl-11 pr-12 py-3 bg-gray-50 border-2 border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
-                      placeholder="Entrez votre mot de passe"
-                      required
-                      disabled={loading}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-green-700 transition-colors disabled:opacity-50"
-                      disabled={loading}
-                      aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Message d'erreur */}
-                {error && (
-                  <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
-                    <p className="text-red-700 text-sm font-medium text-center">{error}</p>
-                  </div>
-                )}
-
-                {/* Bouton de connexion */}
-                <button
-                  type="submit"
+            {/* Mot de passe */}
+            <div style={styles.fieldGroup}>
+              <label style={styles.label}>Mot de passe</label>
+              <div style={styles.inputWrapper}>
+                <Lock size={16} style={styles.inputIcon} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  placeholder="Votre mot de passe"
+                  value={formData.motDePasse}
+                  onChange={e => setFormData({ ...formData, motDePasse: e.target.value })}
+                  required
                   disabled={loading}
-                  className="w-full py-3.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+                  style={{ ...styles.input, paddingRight: '44px' }}
+                  onFocus={e => Object.assign(e.target.style, styles.inputFocus)}
+                  onBlur={e => Object.assign(e.target.style, { borderColor: '#d1d5db', boxShadow: 'none', paddingRight: '44px' })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                  style={styles.eyeBtn}
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Connexion en cours...
-                    </>
-                  ) : (
-                    'Se connecter'
-                  )}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
-              </form>
-
-              {/* Aide */}
-              <div className="mt-6 pt-6 border-t-2 border-gray-200">
-                <p className="text-center text-sm text-gray-600">
-                  Problème de connexion ?{' '}
-                  <span className="text-green-700 font-semibold">
-                    Contactez le service informatique
-                  </span>
-                </p>
-                <p className="text-center text-xs text-gray-500 mt-2">
-                  📞 +228 XX XX XX XX | ✉️ support@inseed.tg
-                </p>
               </div>
             </div>
 
-            {/* Note de sécurité */}
-            <div className="mt-4 text-center">
-              <p className="text-xs text-gray-600 bg-white/70 rounded-lg px-4 py-2 inline-block shadow">
-                🔒 Connexion sécurisée - Réservée aux employés de l'INSEED
-              </p>
-            </div>
+            {/* Erreur */}
+            {error && (
+              <div style={styles.errorBox}>
+                <span style={styles.errorDot}>⚠</span>
+                <span style={styles.errorText}>{error}</span>
+              </div>
+            )}
+
+            {/* Bouton */}
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                ...styles.submitBtn,
+                opacity: loading ? 0.75 : 1,
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
+              onMouseEnter={e => !loading && Object.assign((e.target as HTMLElement).style, styles.submitBtnHover)}
+              onMouseLeave={e => !loading && Object.assign((e.target as HTMLElement).style, { background: '#16a34a', transform: 'none' })}
+            >
+              {loading ? (
+                <span style={styles.btnContent}>
+                  <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  Connexion en cours…
+                </span>
+              ) : (
+                <span style={styles.btnContent}>Se connecter</span>
+              )}
+            </button>
+          </form>
+
+          {/* Aide */}
+          <div style={styles.helpBlock}>
+            <p style={styles.helpText}>
+              Problème de connexion ?{' '}
+              <span style={styles.helpLink}>Contactez le service informatique</span>
+            </p>
+            <p style={styles.helpContact}>📞 +228 22 25 36 00 &nbsp;|&nbsp; ✉️ support@inseed.tg</p>
+          </div>
+
+          {/* Badge sécurité */}
+          <div style={styles.securityBadge}>
+            <span style={styles.securityIcon}>🔒</span>
+            <span style={styles.securityText}>Connexion sécurisée — Réservée aux agents de l'INSEED</span>
           </div>
         </div>
 
-                {/* Footer */}
-        <div className="text-center mt-12 pt-8 border-t-2 border-green-200">
-          <div className="space-y-3">
-            <p className="text-sm text-gray-700 font-medium">
-              © 2025 INSEED - Institut National de la Statistique et des Études Économiques et Démographiques
-            </p>
-            
-            <p className="text-xs text-gray-600 italic">
-              République Togolaise • Travail - Liberté - Patrie
-            </p>
-
-            <div className="flex items-center justify-center gap-6 text-xs text-gray-500">
-              <span>📞 +228 22 25 36 00</span>
-              <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-              <span>✉️ contact@inseed.tg</span>
-              <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-              <span>www.inseed.tg</span>
-            </div>
-          </div>
+        {/* Logo mobile */}
+        <div style={styles.mobileLogo}>
+          <img src={logoInseed} alt="INSEED" style={{ height: '48px', objectFit: 'contain' }} />
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) {
+          .left-panel { display: none !important; }
+          .right-panel { width: 100% !important; }
+        }
+      `}</style>
     </div>
   );
+};
+
+const GREEN = '#16a34a';
+const GREEN_DARK = '#15803d';
+const GREEN_LIGHT = '#f0fdf4';
+const GREEN_BORDER = '#bbf7d0';
+
+const styles: Record<string, React.CSSProperties> = {
+  root: {
+    display: 'flex',
+    minHeight: '100vh',
+    background: '#f8fafc',
+    fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
+  },
+
+  // === Panneau gauche ===
+  leftPanel: {
+    width: '45%',
+    background: `linear-gradient(160deg, ${GREEN_DARK} 0%, ${GREEN} 60%, #22c55e 100%)`,
+    position: 'relative',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  accentBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '4px',
+    height: '100%',
+    background: 'rgba(255,255,255,0.3)',
+  },
+  leftContent: {
+    position: 'relative',
+    zIndex: 1,
+    padding: '48px 40px',
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  },
+  republicBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    background: 'rgba(255,255,255,0.12)',
+    borderRadius: '6px',
+    padding: '8px 14px',
+    marginBottom: '40px',
+    backdropFilter: 'blur(8px)',
+    width: 'fit-content',
+  },
+  republicText: {
+    fontSize: '10px',
+    fontWeight: 700,
+    color: 'rgba(255,255,255,0.9)',
+    letterSpacing: '1.5px',
+  },
+  republicDivider: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: '12px',
+  },
+  republicMotto: {
+    fontSize: '10px',
+    color: 'rgba(255,255,255,0.7)',
+    fontStyle: 'italic',
+    letterSpacing: '0.5px',
+  },
+  logoWrapper: {
+    background: 'white',
+    borderRadius: '16px',
+    padding: '20px 28px',
+    marginBottom: '32px',
+    width: 'fit-content',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+  },
+  logo: {
+    height: '64px',
+    objectFit: 'contain',
+    display: 'block',
+  },
+  institutionBlock: {
+    marginBottom: '24px',
+  },
+  institutionName: {
+    fontSize: '36px',
+    fontWeight: 800,
+    color: 'white',
+    margin: 0,
+    letterSpacing: '2px',
+    lineHeight: 1,
+  },
+  institutionFull: {
+    fontSize: '13px',
+    color: 'rgba(255,255,255,0.75)',
+    margin: '8px 0 0',
+    lineHeight: 1.6,
+  },
+  divider: {
+    width: '48px',
+    height: '3px',
+    background: 'rgba(255,255,255,0.4)',
+    borderRadius: '2px',
+    marginBottom: '24px',
+  },
+  systemBlock: {
+    marginBottom: '36px',
+  },
+  systemLabel: {
+    fontSize: '10px',
+    fontWeight: 700,
+    color: 'rgba(255,255,255,0.6)',
+    letterSpacing: '2px',
+    margin: 0,
+  },
+  systemTitle: {
+    fontSize: '22px',
+    fontWeight: 700,
+    color: 'white',
+    margin: '6px 0 0',
+  },
+  features: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '14px',
+    flex: 1,
+  },
+  feature: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+    background: 'rgba(255,255,255,0.1)',
+    borderRadius: '10px',
+    padding: '12px 16px',
+    backdropFilter: 'blur(4px)',
+  },
+  featureIcon: {
+    fontSize: '18px',
+    lineHeight: 1,
+  },
+  featureLabel: {
+    fontSize: '13px',
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: 500,
+  },
+  leftFooter: {
+    marginTop: '40px',
+    paddingTop: '20px',
+    borderTop: '1px solid rgba(255,255,255,0.15)',
+  },
+  leftFooterText: {
+    fontSize: '11px',
+    color: 'rgba(255,255,255,0.5)',
+    margin: 0,
+  },
+
+  // === Panneau droit ===
+  rightPanel: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '40px 32px',
+    background: '#f8fafc',
+  },
+  formCard: {
+    width: '100%',
+    maxWidth: '420px',
+    background: 'white',
+    borderRadius: '20px',
+    padding: '40px',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+    border: '1px solid #e5e7eb',
+  },
+  formHeader: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '16px',
+    marginBottom: '32px',
+  },
+  formHeaderAccent: {
+    width: '4px',
+    height: '48px',
+    background: GREEN,
+    borderRadius: '2px',
+    flexShrink: 0,
+    marginTop: '2px',
+  },
+  formTitle: {
+    fontSize: '26px',
+    fontWeight: 700,
+    color: '#111827',
+    margin: 0,
+    lineHeight: 1.2,
+  },
+  formSubtitle: {
+    fontSize: '14px',
+    color: '#6b7280',
+    margin: '4px 0 0',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+  },
+  fieldGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  },
+  label: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: '#374151',
+  },
+  inputWrapper: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  inputIcon: {
+    position: 'absolute',
+    left: '14px',
+    color: '#9ca3af',
+    pointerEvents: 'none',
+  },
+  input: {
+    width: '100%',
+    padding: '12px 14px 12px 42px',
+    border: '1.5px solid #d1d5db',
+    borderRadius: '10px',
+    fontSize: '14px',
+    color: '#111827',
+    background: '#f9fafb',
+    outline: 'none',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+    boxSizing: 'border-box',
+  },
+  inputFocus: {
+    borderColor: GREEN,
+    boxShadow: `0 0 0 3px ${GREEN_LIGHT}`,
+    background: 'white',
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: '14px',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#9ca3af',
+    padding: '4px',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  errorBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    background: '#fef2f2',
+    border: '1px solid #fecaca',
+    borderRadius: '10px',
+    padding: '12px 16px',
+  },
+  errorDot: {
+    fontSize: '14px',
+    color: '#ef4444',
+    flexShrink: 0,
+  },
+  errorText: {
+    fontSize: '13px',
+    color: '#dc2626',
+    fontWeight: 500,
+  },
+  submitBtn: {
+    width: '100%',
+    padding: '14px',
+    background: GREEN,
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    fontSize: '15px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    marginTop: '4px',
+  },
+  submitBtnHover: {
+    background: GREEN_DARK,
+    transform: 'translateY(-1px)',
+  },
+  btnContent: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+  },
+  helpBlock: {
+    marginTop: '28px',
+    paddingTop: '20px',
+    borderTop: '1px solid #f3f4f6',
+    textAlign: 'center' as const,
+  },
+  helpText: {
+    fontSize: '13px',
+    color: '#6b7280',
+    margin: 0,
+  },
+  helpLink: {
+    color: GREEN,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  helpContact: {
+    fontSize: '12px',
+    color: '#9ca3af',
+    margin: '6px 0 0',
+  },
+  securityBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
+    marginTop: '20px',
+    background: GREEN_LIGHT,
+    border: `1px solid ${GREEN_BORDER}`,
+    borderRadius: '8px',
+    padding: '10px 16px',
+  },
+  securityIcon: {
+    fontSize: '13px',
+  },
+  securityText: {
+    fontSize: '11px',
+    color: GREEN_DARK,
+    fontWeight: 500,
+  },
+  mobileLogo: {
+    display: 'none',
+  },
+
+  // === Loading ===
+  loadingScreen: {
+    minHeight: '100vh',
+    background: GREEN_LIGHT,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingContent: {
+    textAlign: 'center' as const,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    gap: '16px',
+  },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: `3px solid ${GREEN_BORDER}`,
+    borderTopColor: GREEN,
+    borderRadius: '50%',
+    animation: 'spin 0.8s linear infinite',
+  },
+  loadingText: {
+    color: GREEN_DARK,
+    fontSize: '14px',
+    fontWeight: 500,
+    margin: 0,
+  },
 };
