@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Download, Edit, Archive, Share2, Eye, X, 
-  FileText, Calendar, User, Building, Tag, ChevronDown, ChevronUp 
+  FileText, Calendar, User, Building, Tag, ChevronDown, ChevronUp, CheckCircle
 } from 'lucide-react';
 import { courrierApi } from '../api/courrierApi';
 import { affectationApi } from '../api/affectationApi';
@@ -12,6 +12,8 @@ import type { Affectation } from '../types/Affectation';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { formatUtils } from '../utils/formatUtils';
+import { DechargeModal } from '../components/courriers/DechargeModal';
+import { ListeDecharges } from '../components/courriers/ListeDecharges';
 
 export const CourrierDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +25,8 @@ export const CourrierDetails: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewType, setPreviewType] = useState<'image' | 'pdf' | 'doc' | 'other' | null>(null);
   const [showFullFiche, setShowFullFiche] = useState(false);
+  const [showDechargeModal, setShowDechargeModal] = useState(false);
+  const [dechargeRefresh, setDechargeRefresh] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -443,10 +447,42 @@ export const CourrierDetails: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Section Décharges */}
+              <div className="mt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    Décharges de réception
+                  </h2>
+                  <button
+                    onClick={() => setShowDechargeModal(true)}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Enregistrer une décharge
+                  </button>
+                </div>
+                <ListeDecharges
+                  idCourrier={Number(id)}
+                  refresh={dechargeRefresh}
+                />
+              </div>
+
             </div>
           </div>
         </main>
       </div>
+
+      {/* Modal décharge */}
+      {showDechargeModal && courrier && (
+        <DechargeModal
+          idCourrier={Number(id)}
+          objetCourrier={courrier.objet || 'Sans objet'}
+          onClose={() => setShowDechargeModal(false)}
+          onSuccess={() => setDechargeRefresh(r => r + 1)}
+        />
+      )}
 
       {/* Modale de prévisualisation améliorée */}
       {previewUrl && previewType === 'image' && (

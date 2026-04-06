@@ -1,11 +1,13 @@
 // src/components/courriers/DetailsCourrier.tsx
 import React, { useState, useEffect } from 'react';
-import { Download, Edit, Archive, Share2, X, Eye, FileText, Calendar, User, Building, Tag, ChevronDown, ChevronUp } from 'lucide-react';
+import { Download, Edit, Archive, Share2, X, Eye, FileText, Calendar, User, Building, Tag, ChevronDown, ChevronUp, CheckCircle } from 'lucide-react';
 import { courrierApi } from '../../api/courrierApi';
 import { affectationApi } from '../../api/affectationApi';
 import type { Courrier } from '../../types/Courrier';
 import type { Affectation } from '../../types/Affectation';
 import { formatUtils } from '../../utils/formatUtils';
+import { DechargeModal } from './DechargeModal';
+import { ListeDecharges } from './ListeDecharges';
 
 interface Props {
   courrierId: number;
@@ -22,6 +24,8 @@ export const DetailsCourrier: React.FC<Props> = ({ courrierId, onClose, onEdit, 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewType, setPreviewType] = useState<'image' | 'pdf' | 'doc' | 'other' | null>(null);
   const [showFullFiche, setShowFullFiche] = useState(false);
+  const [showDechargeModal, setShowDechargeModal] = useState(false);
+  const [dechargeRefresh, setDechargeRefresh] = useState(0);
 
   // Charger les détails du courrier au montage du composant
   useEffect(() => {
@@ -460,8 +464,40 @@ export const DetailsCourrier: React.FC<Props> = ({ courrierId, onClose, onEdit, 
               </div>
             </div>
           )}
+
+          {/* Section Décharges */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                Décharges de réception
+              </h2>
+              <button
+                onClick={() => setShowDechargeModal(true)}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
+              >
+                <CheckCircle className="w-4 h-4" />
+                Enregistrer une décharge
+              </button>
+            </div>
+            <ListeDecharges
+              idCourrier={courrierId}
+              refresh={dechargeRefresh}
+            />
+          </div>
+
         </div>
       </div>
+
+      {/* Modal décharge */}
+      {showDechargeModal && courrier && (
+        <DechargeModal
+          idCourrier={courrierId}
+          objetCourrier={courrier.objet || 'Sans objet'}
+          onClose={() => setShowDechargeModal(false)}
+          onSuccess={() => setDechargeRefresh(r => r + 1)}
+        />
+      )}
 
       {/* Modal de prévisualisation pour les images - Version améliorée avec z-index élevé */}
       {previewUrl && previewType === 'image' && (
