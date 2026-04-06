@@ -7,12 +7,16 @@ interface Props {
   refresh?: number;
 }
 
-const formatDate = (dateStr: string) => {
-  if (!dateStr) return 'Date inconnue';
-  // Normalise le format "2026-04-06 21:41:12" en "2026-04-06T21:41:12"
-  const normalized = dateStr.replace(' ', 'T');
+const formatDate = (dateStr: string | undefined | null): string => {
+  console.log('Date reçue du backend:', dateStr); // À retirer après vérification
+  if (!dateStr) return 'Date non disponible';
+  let normalized = dateStr;
+  // Si la chaîne contient un espace mais pas de 'T', on remplace
+  if (normalized.includes(' ') && !normalized.includes('T')) {
+    normalized = normalized.replace(' ', 'T');
+  }
   const date = new Date(normalized);
-  if (isNaN(date.getTime())) return 'Date invalide';
+  if (isNaN(date.getTime())) return 'Format de date invalide';
   return date.toLocaleString('fr-FR');
 };
 
