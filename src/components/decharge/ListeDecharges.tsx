@@ -8,10 +8,8 @@ interface Props {
 }
 
 const formatDate = (dateStr: string | undefined | null): string => {
-  console.log('Date reçue du backend:', dateStr); // À retirer après vérification
   if (!dateStr) return 'Date non disponible';
   let normalized = dateStr;
-  // Si la chaîne contient un espace mais pas de 'T', on remplace
   if (normalized.includes(' ') && !normalized.includes('T')) {
     normalized = normalized.replace(' ', 'T');
   }
@@ -55,7 +53,7 @@ export const ListeDecharges: React.FC<Props> = ({ idCourrier, refresh }) => {
             </div>
             <div style={styles.date}>
               <Calendar size={12} color="#9ca3af" />
-              <span>{formatDate(d.dateSignature)}</span>
+              <span>{formatDate(d.date_signature)}</span>
             </div>
           </div>
           <div style={styles.signataire}>
