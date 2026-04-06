@@ -4,8 +4,17 @@ import { dechargeApi, Decharge } from '../../api/dechargeApi';
 
 interface Props {
   idCourrier: number;
-  refresh?: number; // incrémenter pour forcer le rechargement
+  refresh?: number;
 }
+
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return 'Date inconnue';
+  // Normalise le format "2026-04-06 21:41:12" en "2026-04-06T21:41:12"
+  const normalized = dateStr.replace(' ', 'T');
+  const date = new Date(normalized);
+  if (isNaN(date.getTime())) return 'Date invalide';
+  return date.toLocaleString('fr-FR');
+};
 
 export const ListeDecharges: React.FC<Props> = ({ idCourrier, refresh }) => {
   const [decharges, setDecharges] = useState<Decharge[]>([]);
@@ -42,7 +51,7 @@ export const ListeDecharges: React.FC<Props> = ({ idCourrier, refresh }) => {
             </div>
             <div style={styles.date}>
               <Calendar size={12} color="#9ca3af" />
-              <span>{new Date(d.dateSignature).toLocaleString('fr-FR')}</span>
+              <span>{formatDate(d.dateSignature)}</span>
             </div>
           </div>
           <div style={styles.signataire}>
