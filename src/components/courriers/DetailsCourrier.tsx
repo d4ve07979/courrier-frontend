@@ -6,8 +6,8 @@ import { affectationApi } from '../../api/affectationApi';
 import type { Courrier } from '../../types/Courrier';
 import type { Affectation } from '../../types/Affectation';
 import { formatUtils } from '../../utils/formatUtils';
-import { DechargeModal } from './DechargeModal';
-import { ListeDecharges } from './ListeDecharges';
+import { DechargeModal } from '../decharge/DechargeModal';
+import { ListeDecharges } from '../decharge/ListeDecharges';
 
 interface Props {
   courrierId: number;

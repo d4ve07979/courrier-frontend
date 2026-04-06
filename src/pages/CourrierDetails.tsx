@@ -12,8 +12,8 @@ import type { Affectation } from '../types/Affectation';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { formatUtils } from '../utils/formatUtils';
-import { DechargeModal } from '../components/courriers/DechargeModal';
-import { ListeDecharges } from '../components/courriers/ListeDecharges';
+import { DechargeModal } from '../components/decharge/DechargeModal';
+import { ListeDecharges } from '../components/decharge/ListeDecharges';
 
 export const CourrierDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
