@@ -1,5 +1,5 @@
 // src/pages/MesCourriersPage.tsx
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Mail, Filter, FileText, X, 
@@ -22,21 +22,17 @@ export const MesCourriersPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // États
   const [courriers, setCourriers] = useState<Courrier[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Pagination
   const [page, setPage] = useState(0);
   const [size] = useState(20);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  // Recherche (debounced via SearchBar)
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Filtres avancés
   const [filtresTemp, setFiltresTemp] = useState({
     statut: '',
     typeCourrier: '',
@@ -51,7 +47,6 @@ export const MesCourriersPage: React.FC = () => {
   });
   const [showFiltres, setShowFiltres] = useState(false);
 
-  // Statistiques détaillées (depuis le backend)
   const [detailedStats, setDetailedStats] = useState({
     total: 0,
     entrants: 0,
@@ -67,7 +62,6 @@ export const MesCourriersPage: React.FC = () => {
     parType: {} as Record<string, number>,
   });
 
-  // Modals
   const [courrierDetails, setCourrierDetails] = useState<Courrier | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [courrierAffecte, setCourrierAffecte] = useState<Courrier | null>(null);
@@ -76,14 +70,11 @@ export const MesCourriersPage: React.FC = () => {
   const [showSendToDG, setShowSendToDG] = useState(false);
   const [courrierToSend, setCourrierToSend] = useState<Courrier | null>(null);
 
-  // Chargement des courriers avec les filtres appliqués
   const loadMesCourriers = useCallback(async () => {
     if (!user) return;
-
     try {
       setLoading(true);
       setError(null);
-
       const params: CourrierSearchParams = {
         page,
         size,
@@ -93,11 +84,7 @@ export const MesCourriersPage: React.FC = () => {
         dateDebut: filtresAppliques.dateDebut || undefined,
         dateFin: filtresAppliques.dateFin || undefined,
       };
-
-      console.log('📡 Chargement des courriers avec params:', params);
-
       const response = await CourrierService.listerMesCourriers(params);
-
       if (response && typeof response === 'object') {
         setCourriers(response.courriers || []);
         setTotalElements(response.total || 0);
@@ -108,7 +95,6 @@ export const MesCourriersPage: React.FC = () => {
         setTotalPages(0);
       }
     } catch (err: any) {
-      console.error('Erreur chargement mes courriers:', err);
       setError('Impossible de charger vos courriers.');
       setCourriers([]);
       setTotalElements(0);
@@ -118,10 +104,8 @@ export const MesCourriersPage: React.FC = () => {
     }
   }, [user, page, size, searchTerm, filtresAppliques]);
 
-  // Chargement des statistiques détaillées
   const loadMesStatistiques = useCallback(async () => {
     if (!user) return;
-
     try {
       const params = {
         recherche: searchTerm || undefined,
@@ -130,25 +114,18 @@ export const MesCourriersPage: React.FC = () => {
         dateDebut: filtresAppliques.dateDebut || undefined,
         dateFin: filtresAppliques.dateFin || undefined,
       };
-
-      console.log('📊 Chargement des statistiques avec params:', params);
-
       const data = await CourrierService.getMesStatistiques(params);
-      if (data) {
-        setDetailedStats(data);
-      }
+      if (data) setDetailedStats(data);
     } catch (err) {
-      console.error('Erreur chargement statistiques détaillées:', err);
+      console.error('Erreur chargement statistiques:', err);
     }
   }, [user, searchTerm, filtresAppliques]);
 
-  // Effet principal : charger les courriers ET les stats
   useEffect(() => {
     loadMesCourriers();
     loadMesStatistiques();
   }, [loadMesCourriers, loadMesStatistiques]);
 
-  // Gestionnaires
   const handleFiltreChange = (key: keyof typeof filtresTemp, value: string) => {
     setFiltresTemp(prev => ({ ...prev, [key]: value }));
   };
@@ -166,7 +143,6 @@ export const MesCourriersPage: React.FC = () => {
     setSearchTerm('');
   };
 
-  // Actions courrier
   const handleViewCourrier = (courrier: Courrier) => {
     setCourrierDetails(courrier);
     setShowDetailsModal(true);
@@ -212,31 +188,36 @@ export const MesCourriersPage: React.FC = () => {
     }
   };
 
-  // Pagination
   const handlePagePrecedente = () => setPage(p => Math.max(0, p - 1));
   const handlePageSuivante = () => setPage(p => Math.min(totalPages - 1, p + 1));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    /* Fond blanc uni */
+    <div className="min-h-screen bg-white">
+      {/* Navbar fixe en haut */}
       <Navbar />
+
       <div className="flex">
+        {/* Sidebar — maintenant fixed en interne (voir Sidebar.tsx) */}
         <Sidebar />
-        <main className="flex-1 p-4 md:p-8 pt-20 md:pt-24">
+
+        {/* Contenu principal : marge top pour la Navbar */}
+        <main className="flex-1 p-4 md:p-8 pt-20 md:pt-24 min-h-screen bg-gray-50">
           <div className="max-w-7xl mx-auto space-y-6">
 
             {/* En-tête */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
                   Mes courriers créés
                 </h1>
-                <p className="text-slate-400 text-sm">
+                <p className="text-gray-500 text-sm">
                   Gérez les courriers que vous avez initiés
                 </p>
               </div>
               <button
                 onClick={() => navigate('/creer-courrier')}
-                className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
+                className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
               >
                 <FileText className="w-5 h-5" />
                 Nouveau courrier
@@ -246,8 +227,8 @@ export const MesCourriersPage: React.FC = () => {
             {/* Barre de recherche et bouton filtres */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1">
-                <SearchBar 
-                  onSearch={setSearchTerm} 
+                <SearchBar
+                  onSearch={setSearchTerm}
                   placeholder="Rechercher par objet, expéditeur..."
                   debounceMs={500}
                 />
@@ -255,10 +236,10 @@ export const MesCourriersPage: React.FC = () => {
               <button
                 onClick={() => setShowFiltres(!showFiltres)}
                 className={`
-                  px-5 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 min-w-[140px]
-                  ${showFiltres 
-                    ? 'bg-purple-600 text-white shadow-md' 
-                    : 'bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700'
+                  px-5 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 min-w-[140px] border
+                  ${showFiltres
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }
                 `}
               >
@@ -269,12 +250,12 @@ export const MesCourriersPage: React.FC = () => {
 
             {/* Panneau de filtres */}
             {showFiltres && (
-              <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-xl p-6 animate-fadeIn">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                 <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-lg font-medium text-white">Filtres avancés</h3>
-                  <button 
+                  <h3 className="text-lg font-semibold text-gray-900">Filtres avancés</h3>
+                  <button
                     onClick={() => setShowFiltres(false)}
-                    className="text-slate-400 hover:text-white transition-colors"
+                    className="text-gray-400 hover:text-gray-700 transition-colors"
                   >
                     <X className="w-6 h-6" />
                   </button>
@@ -282,11 +263,11 @@ export const MesCourriersPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div>
-                    <label className="block text-sm text-slate-300 mb-2">Statut</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
                     <select
                       value={filtresTemp.statut}
                       onChange={e => handleFiltreChange('statut', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-gray-600 focus:ring-1 focus:ring-gray-600"
                     >
                       <option value="">Tous</option>
                       <option value="EN_ATTENTE">En attente</option>
@@ -298,11 +279,11 @@ export const MesCourriersPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-slate-300 mb-2">Type</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
                     <select
                       value={filtresTemp.typeCourrier}
                       onChange={e => handleFiltreChange('typeCourrier', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-gray-600 focus:ring-1 focus:ring-gray-600"
                     >
                       <option value="">Tous</option>
                       <option value="ENT">Entrant</option>
@@ -311,22 +292,22 @@ export const MesCourriersPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-slate-300 mb-2">Date début</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Date début</label>
                     <input
                       type="date"
                       value={filtresTemp.dateDebut}
                       onChange={e => handleFiltreChange('dateDebut', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-gray-600 focus:ring-1 focus:ring-gray-600"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-slate-300 mb-2">Date fin</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Date fin</label>
                     <input
                       type="date"
                       value={filtresTemp.dateFin}
                       onChange={e => handleFiltreChange('dateFin', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-gray-600 focus:ring-1 focus:ring-gray-600"
                     />
                   </div>
                 </div>
@@ -334,13 +315,13 @@ export const MesCourriersPage: React.FC = () => {
                 <div className="flex justify-end gap-4 mt-6">
                   <button
                     onClick={reinitialiserFiltres}
-                    className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors"
+                    className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
                   >
                     Réinitialiser
                   </button>
                   <button
                     onClick={appliquerFiltres}
-                    className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+                    className="px-6 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg font-medium transition-colors"
                   >
                     Appliquer
                   </button>
@@ -348,64 +329,24 @@ export const MesCourriersPage: React.FC = () => {
               </div>
             )}
 
-            {/* Statistiques détaillées */}
-           {!loading && !error && (
-  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
-    <StatCard 
-      icon={<Mail className="w-5 h-5" />}
-      label="Total"
-      value={detailedStats.total}
-      color="slate"
-    />
-    <StatCard 
-      icon={<Inbox className="w-5 h-5" />}
-      label="Entrants"
-      value={detailedStats.entrants}
-      color="indigo"
-    />
-    <StatCard 
-      icon={<Send className="w-5 h-5" />}
-      label="Sortants"
-      value={detailedStats.sortants}
-      color="cyan"
-    />
-    <StatCard 
-      icon={<Clock className="w-5 h-5" />}
-      label="En attente"
-      value={detailedStats.enAttente}
-      color="orange"
-    />
-    <StatCard 
-      icon={<RefreshCw className="w-5 h-5" />}
-      label="En cours"
-      value={detailedStats.enCours}
-      color="blue"
-    />
-    <StatCard 
-      icon={<CheckCircle className="w-5 h-5" />}
-      label="Traités"
-      value={detailedStats.traites}
-      color="green"
-    />
-    <StatCard 
-      icon={<Archive className="w-5 h-5" />}
-      label="Archivés"
-      value={detailedStats.archives}
-      color="slate"
-    />
-    <StatCard 
-      icon={<AlertCircle className="w-5 h-5" />}
-      label="Urgents"
-      value={detailedStats.urgents}
-      color="red"
-    />
-  </div>
-)}
+            {/* Statistiques */}
+            {!loading && !error && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                <StatCard icon={<Mail className="w-4 h-4" />} label="Total" value={detailedStats.total} />
+                <StatCard icon={<Inbox className="w-4 h-4" />} label="Entrants" value={detailedStats.entrants} />
+                <StatCard icon={<Send className="w-4 h-4" />} label="Sortants" value={detailedStats.sortants} />
+                <StatCard icon={<Clock className="w-4 h-4" />} label="En attente" value={detailedStats.enAttente} />
+                <StatCard icon={<RefreshCw className="w-4 h-4" />} label="En cours" value={detailedStats.enCours} />
+                <StatCard icon={<CheckCircle className="w-4 h-4" />} label="Traités" value={detailedStats.traites} />
+                <StatCard icon={<Archive className="w-4 h-4" />} label="Archivés" value={detailedStats.archives} />
+                <StatCard icon={<AlertCircle className="w-4 h-4" />} label="Urgents" value={detailedStats.urgents} />
+              </div>
+            )}
 
-            {/* Message d'erreur */}
+            {/* Erreur */}
             {error && (
-              <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4 text-red-300 flex items-center gap-3">
-                <AlertCircle className="w-6 h-6 flex-shrink-0" />
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
                 <p>{error}</p>
               </div>
             )}
@@ -413,7 +354,7 @@ export const MesCourriersPage: React.FC = () => {
             {/* Chargement */}
             {loading && (
               <div className="flex justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-300 border-t-gray-900" />
               </div>
             )}
 
@@ -421,18 +362,18 @@ export const MesCourriersPage: React.FC = () => {
             {!loading && !error && (
               <>
                 {courriers.length === 0 ? (
-                  <div className="text-center py-20 bg-slate-800/30 rounded-2xl border border-dashed border-slate-700">
-                    <Mail className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-                    <h3 className="text-xl text-white mb-2">Aucun courrier trouvé</h3>
-                    <p className="text-slate-400 mb-6">
+                  <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+                    <Mail className="w-14 h-14 mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">Aucun courrier trouvé</h3>
+                    <p className="text-gray-500 mb-6">
                       {searchTerm || filtresAppliques.statut || filtresAppliques.typeCourrier
-                        ? "Aucun résultat ne correspond à vos critères"
+                        ? 'Aucun résultat ne correspond à vos critères'
                         : "Vous n'avez pas encore créé de courrier"}
                     </p>
                     {(searchTerm || filtresAppliques.statut || filtresAppliques.typeCourrier) && (
                       <button
                         onClick={reinitialiserFiltres}
-                        className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                        className="px-6 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors"
                       >
                         Réinitialiser les filtres
                       </button>
@@ -459,29 +400,31 @@ export const MesCourriersPage: React.FC = () => {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-4 border-t border-slate-700/50">
-                    <p className="text-sm text-slate-400">
-                      Affichage de <span className="font-medium text-white">{page * size + 1}</span> à{' '}
-                      <span className="font-medium text-white">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-500">
+                      Affichage de{' '}
+                      <span className="font-semibold text-gray-900">{page * size + 1}</span> à{' '}
+                      <span className="font-semibold text-gray-900">
                         {Math.min((page + 1) * size, totalElements)}
                       </span>{' '}
-                      sur <span className="font-medium text-white">{totalElements}</span> courriers
+                      sur{' '}
+                      <span className="font-semibold text-gray-900">{totalElements}</span> courriers
                     </p>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handlePagePrecedente}
                         disabled={page === 0}
-                        className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700 transition-colors"
+                        className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-sm font-medium"
                       >
                         Précédent
                       </button>
-                      <span className="text-white">
+                      <span className="text-gray-600 text-sm">
                         Page {page + 1} / {totalPages}
                       </span>
                       <button
                         onClick={handlePageSuivante}
                         disabled={page >= totalPages - 1}
-                        className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700 transition-colors"
+                        className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-sm font-medium"
                       >
                         Suivant
                       </button>
@@ -513,10 +456,7 @@ export const MesCourriersPage: React.FC = () => {
         <SendToUserModal
           courrier={courrierToSend}
           isOpen={showSendToUser}
-          onClose={() => {
-            setShowSendToUser(false);
-            setCourrierToSend(null);
-          }}
+          onClose={() => { setShowSendToUser(false); setCourrierToSend(null); }}
           onSuccess={handleSendSuccess}
         />
       )}
@@ -524,10 +464,7 @@ export const MesCourriersPage: React.FC = () => {
         <SendToDGModal
           courrier={courrierToSend}
           isOpen={showSendToDG}
-          onClose={() => {
-            setShowSendToDG(false);
-            setCourrierToSend(null);
-          }}
+          onClose={() => { setShowSendToDG(false); setCourrierToSend(null); }}
           onSuccess={handleSendSuccess}
         />
       )}
@@ -535,31 +472,19 @@ export const MesCourriersPage: React.FC = () => {
   );
 };
 
-// Composant pour les cartes de statistiques
+// Composant StatCard — palette noir/blanc uniforme
 const StatCard: React.FC<{
   icon: React.ReactNode;
   label: string;
   value: number;
-  color: 'slate' | 'purple' | 'blue' | 'indigo' | 'cyan' | 'orange' | 'green' | 'red';
-}> = ({ icon, label, value, color }) => {
-  const colorClasses = {
-    slate: 'bg-slate-800 border-slate-600 text-slate-300',
-    purple: 'bg-purple-900/30 border-purple-600/50 text-purple-300',
-    blue: 'bg-blue-900/30 border-blue-600/50 text-blue-300',
-    indigo: 'bg-indigo-900/30 border-indigo-600/50 text-indigo-300',
-    cyan: 'bg-cyan-900/30 border-cyan-600/50 text-cyan-300',
-    orange: 'bg-orange-900/30 border-orange-600/50 text-orange-300',
-    green: 'bg-green-900/30 border-green-600/50 text-green-300',
-    red: 'bg-red-900/30 border-red-600/50 text-red-300',
-  };
-
+}> = ({ icon, label, value }) => {
   return (
-    <div className={`${colorClasses[color]} border rounded-xl p-4 transition-transform hover:scale-105 duration-200`}>
-      <div className="flex items-center gap-2 mb-2">
+    <div className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-shadow duration-200">
+      <div className="flex items-center gap-2 mb-2 text-gray-500">
         {icon}
-        <span className="text-xs font-medium uppercase tracking-wider opacity-80">{label}</span>
+        <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
       </div>
-      <p className="text-2xl font-bold">{value.toLocaleString()}</p>
+      <p className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</p>
     </div>
   );
 };
