@@ -501,7 +501,7 @@ export const DetailsCourrier: React.FC<Props> = ({ courrierId, onClose, onEdit, 
 
       {/* Modal de prévisualisation pour les images - Version améliorée avec z-index élevé */}
       {previewUrl && previewType === 'image' && (
-        <div className="fixed inset-0 flex items-center justify-center z-[100] p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
+        <div className="fixed inset-0 flex items-center justify-center z-[1050] p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
           <div className="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 scale-100">
             {/* En-tête du modal */}
             <div className="flex justify-between items-center px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
@@ -556,7 +556,7 @@ export const DetailsCourrier: React.FC<Props> = ({ courrierId, onClose, onEdit, 
 
       {/* Modal de prévisualisation PDF - Version améliorée avec z-index élevé */}
       {previewUrl && previewType === 'pdf' && (
-        <div className="fixed inset-0 flex items-center justify-center z-[100] p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
+        <div className="fixed inset-0 flex items-center justify-center z-[1050] p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
           <div className="bg-white rounded-2xl w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-all duration-300 scale-100">
             {/* En-tête du modal */}
             <div className="flex justify-between items-center px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
@@ -602,7 +602,7 @@ export const DetailsCourrier: React.FC<Props> = ({ courrierId, onClose, onEdit, 
 
       {/* Message pour les fichiers non prévisualisables */}
       {previewUrl && previewType === 'doc' && (
-        <div className="fixed inset-0 flex items-center justify-center z-[100] p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
+        <div className="fixed inset-0 flex items-center justify-center z-[1050] p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl transform transition-all duration-300 scale-100">
             <div className="p-6">
               <div className="flex items-center gap-4 mb-4">
