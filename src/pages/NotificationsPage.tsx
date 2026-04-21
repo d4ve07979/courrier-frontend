@@ -67,7 +67,7 @@ export const NotificationsPage: React.FC = () => {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 pt-20"> {/* ← AJOUT DE pt-20 */}
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-8">
               <div>
