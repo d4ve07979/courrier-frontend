@@ -46,7 +46,7 @@ export const Sidebar: React.FC = () => {
   return (
     <div className={`bg-slate-800/50 backdrop-blur-sm border-r border-slate-700 min-h-screen transition-all duration-300 ${
       isCollapsed ? 'w-20' : 'w-64'
-    } flex flex-col`}>
+    } flex flex-col pt-20`}>
       {/* Logo INSEED en haut */}
       <div className="p-4 border-b border-slate-700 flex items-center justify-center">
         <div className={`bg-white rounded-xl p-2 border-2 border-green-600 shadow-md transition-all ${
