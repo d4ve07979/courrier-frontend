@@ -5,10 +5,10 @@ import {
   Mail, Clock, CheckCircle, XCircle, Archive,
   ChevronRight, Calendar, User, Download, Eye,
   Filter, Search, FileText, MessageSquare, X,
-  AlertCircle, RefreshCw, PauseCircle
+  AlertCircle, RefreshCw, PauseCircle, Send
 } from 'lucide-react';
 import { useAuth } from '../../auth/useAuth';
-import { useNotifications } from '../../hooks/useNotifications'; // ← Import du hook
+import { useNotifications } from '../../hooks/useNotifications';
 import { CourrierService } from '../../services/courrierService';
 import { affectationApi } from '../../api/affectationApi';
 import type { AffectationDTO } from '../../api/affectationApi';
@@ -16,6 +16,7 @@ import { statutApi } from '../../api/statutApi';
 import { formatUtils } from '../../utils/formatUtils';
 import { Navbar } from '../../components/Navbar';
 import { Sidebar } from '../../components/Sidebar';
+import { SendToUserModal } from '../../components/courriers/SendToUserModal'; // ← IMPORT AJOUTÉ
 import type { Courrier } from '../../types/Courrier';
 import type { Affectation } from '../../types/Affectation';
 import type { Statut } from '../../types/Courrier';
@@ -27,7 +28,7 @@ interface CourrierAvecAffectation extends Courrier {
 export const DGDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { notifications } = useNotifications(); // ← Récupération des notifications
+  const { notifications } = useNotifications();
 
   const [courriers, setCourriers] = useState<CourrierAvecAffectation[]>([]);
   const [filteredCourriers, setFilteredCourriers] = useState<CourrierAvecAffectation[]>([]);
@@ -49,21 +50,21 @@ export const DGDashboard: React.FC = () => {
   const [statuts, setStatuts] = useState<Statut[]>([]);
   const [loadingStatuts, setLoadingStatuts] = useState(false);
 
-  // Chargement initial
+  // États pour le modal "Envoyer à un utilisateur"
+  const [showSendToUser, setShowSendToUser] = useState(false);
+  const [courrierToSend, setCourrierToSend] = useState<Courrier | null>(null);
+
   useEffect(() => {
     loadCourriers();
     loadStatuts();
   }, []);
 
-  // Recharger les courriers à chaque nouvelle notification (optionnel)
   useEffect(() => {
     if (notifications.length > 0) {
-      // Vous pouvez filtrer pour ne recharger que si la notification concerne un courrier
       loadCourriers();
     }
   }, [notifications]);
 
-  // Filtrage local
   useEffect(() => {
     filterCourriers();
   }, [courriers, searchTerm, filtres]);
@@ -149,10 +150,9 @@ export const DGDashboard: React.FC = () => {
       alert(`Statut ${nouveauStatutCode} non trouvé`);
       return;
     }
-
     try {
       await CourrierService.changerStatut(courrierId, statut.id_statut);
-      await loadCourriers(); // recharger après modification
+      await loadCourriers();
       setShowStatutModal(false);
       setSelectedCourrier(null);
       setCommentaire('');
@@ -202,6 +202,28 @@ export const DGDashboard: React.FC = () => {
       'EN_INSTANCE': 'bg-slate-500/20 text-slate-400 border-slate-500/30',
     };
     return classes[statut || ''] || classes['EN_ATTENTE'];
+  };
+
+  // Fonction pour ouvrir le modal d'envoi à un utilisateur
+  const handleSendToUser = (courrier: CourrierAvecAffectation) => {
+    // Transformer en Courrier standard (sans affectation)
+    const courrierSimple: Courrier = {
+      id_courrier: courrier.id_courrier,
+      objet: courrier.objet,
+      date_reception: courrier.date_reception,
+      id_statut: courrier.id_statut,
+      id_expediteur: courrier.id_expediteur,
+      id_destinataire: courrier.id_destinataire,
+      fichiers: courrier.fichiers || [],
+      id_type_courrier: courrier.id_type_courrier,
+      id_fiche: courrier.id_fiche,
+    };
+    setCourrierToSend(courrierSimple);
+    setShowSendToUser(true);
+  };
+
+  const handleSendSuccess = () => {
+    loadCourriers(); // Recharger la liste après envoi
   };
 
   if (loading) {
@@ -366,6 +388,13 @@ export const DGDashboard: React.FC = () => {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
+                          onClick={() => handleSendToUser(courrier)}
+                          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                          title="Envoyer à un utilisateur"
+                        >
+                          <Send className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => {
                             setSelectedCourrier(courrier);
                             setCommentaire('');
@@ -386,7 +415,7 @@ export const DGDashboard: React.FC = () => {
         </main>
       </div>
 
-      {/* Modal de changement de statut */}
+      {/* Modal de changement de statut (inchangé) */}
       {showStatutModal && selectedCourrier && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full">
@@ -510,6 +539,19 @@ export const DGDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal d'envoi à un utilisateur */}
+      {showSendToUser && courrierToSend && (
+        <SendToUserModal
+          courrier={courrierToSend}
+          isOpen={showSendToUser}
+          onClose={() => setShowSendToUser(false)}
+          onSuccess={() => {
+            setShowSendToUser(false);
+            handleSendSuccess();
+          }}
+        />
       )}
 
       {/* Modales de prévisualisation (inchangées) */}
