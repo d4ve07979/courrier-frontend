@@ -47,21 +47,6 @@ export const MesCourriersPage: React.FC = () => {
   });
   const [showFiltres, setShowFiltres] = useState(false);
 
-  const [detailedStats, setDetailedStats] = useState({
-    total: 0,
-    entrants: 0,
-    sortants: 0,
-    enAttente: 0,
-    enCours: 0,
-    traites: 0,
-    archives: 0,
-    classes: 0,
-    rejetes: 0,
-    urgents: 0,
-    parStatut: {} as Record<string, number>,
-    parType: {} as Record<string, number>,
-  });
-
   const [courrierDetails, setCourrierDetails] = useState<Courrier | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [courrierAffecte, setCourrierAffecte] = useState<Courrier | null>(null);
@@ -104,27 +89,9 @@ export const MesCourriersPage: React.FC = () => {
     }
   }, [user, page, size, searchTerm, filtresAppliques]);
 
-  const loadMesStatistiques = useCallback(async () => {
-    if (!user) return;
-    try {
-      const params = {
-        recherche: searchTerm || undefined,
-        statut: filtresAppliques.statut || undefined,
-        type: filtresAppliques.typeCourrier || undefined,
-        dateDebut: filtresAppliques.dateDebut || undefined,
-        dateFin: filtresAppliques.dateFin || undefined,
-      };
-      const data = await CourrierService.getMesStatistiques(params);
-      if (data) setDetailedStats(data);
-    } catch (err) {
-      console.error('Erreur chargement statistiques:', err);
-    }
-  }, [user, searchTerm, filtresAppliques]);
-
   useEffect(() => {
     loadMesCourriers();
-    loadMesStatistiques();
-  }, [loadMesCourriers, loadMesStatistiques]);
+  }, [loadMesCourriers]);
 
   const handleFiltreChange = (key: keyof typeof filtresTemp, value: string) => {
     setFiltresTemp(prev => ({ ...prev, [key]: value }));
@@ -155,7 +122,6 @@ export const MesCourriersPage: React.FC = () => {
 
   const handleAffectationSuccess = () => {
     loadMesCourriers();
-    loadMesStatistiques();
   };
 
   const handleSendToUser = (courrier: Courrier) => {
@@ -170,7 +136,6 @@ export const MesCourriersPage: React.FC = () => {
 
   const handleSendSuccess = () => {
     loadMesCourriers();
-    loadMesStatistiques();
   };
 
   const handleEditCourrier = (courrier: Courrier) => {
@@ -182,7 +147,6 @@ export const MesCourriersPage: React.FC = () => {
     try {
       await CourrierService.supprimerCourrier(courrier.id_courrier);
       loadMesCourriers();
-      loadMesStatistiques();
     } catch (err) {
       alert('Erreur lors de la suppression');
     }
@@ -192,16 +156,10 @@ export const MesCourriersPage: React.FC = () => {
   const handlePageSuivante = () => setPage(p => Math.min(totalPages - 1, p + 1));
 
   return (
-    /* Fond blanc uni */
     <div className="min-h-screen bg-white">
-      {/* Navbar fixe en haut */}
       <Navbar />
-
       <div className="flex">
-        {/* Sidebar — maintenant fixed en interne (voir Sidebar.tsx) */}
         <Sidebar />
-
-        {/* Contenu principal : marge top pour la Navbar */}
         <main className="flex-1 p-4 md:p-8 pt-20 md:pt-24 min-h-screen bg-gray-50">
           <div className="max-w-7xl mx-auto space-y-6">
 
@@ -326,20 +284,6 @@ export const MesCourriersPage: React.FC = () => {
                     Appliquer
                   </button>
                 </div>
-              </div>
-            )}
-
-            {/* Statistiques */}
-            {!loading && !error && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-                <StatCard icon={<Mail className="w-4 h-4" />} label="Total" value={detailedStats.total} />
-                <StatCard icon={<Inbox className="w-4 h-4" />} label="Entrants" value={detailedStats.entrants} />
-                <StatCard icon={<Send className="w-4 h-4" />} label="Sortants" value={detailedStats.sortants} />
-                <StatCard icon={<Clock className="w-4 h-4" />} label="En attente" value={detailedStats.enAttente} />
-                <StatCard icon={<RefreshCw className="w-4 h-4" />} label="En cours" value={detailedStats.enCours} />
-                <StatCard icon={<CheckCircle className="w-4 h-4" />} label="Traités" value={detailedStats.traites} />
-                <StatCard icon={<Archive className="w-4 h-4" />} label="Archivés" value={detailedStats.archives} />
-                <StatCard icon={<AlertCircle className="w-4 h-4" />} label="Urgents" value={detailedStats.urgents} />
               </div>
             )}
 
@@ -468,23 +412,6 @@ export const MesCourriersPage: React.FC = () => {
           onSuccess={handleSendSuccess}
         />
       )}
-    </div>
-  );
-};
-
-// Composant StatCard — palette noir/blanc uniforme
-const StatCard: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-}> = ({ icon, label, value }) => {
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-shadow duration-200">
-      <div className="flex items-center gap-2 mb-2 text-gray-500">
-        {icon}
-        <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
-      </div>
-      <p className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</p>
     </div>
   );
 };
