@@ -30,25 +30,21 @@ export const CourrierCard: React.FC<Props> = ({
   onSendToUser,
   onSendToDG
 }) => {
-  const getTypeIcon = () => {
-    const isEntrant = courrier.id_expediteur ? true : false;
-    return isEntrant ? Mail : Send;
-  };
+  // Déterminer le type de courrier (entrant / sortant)
+  const typeCode = courrier.id_type_courrier?.code;
+  const isEntrant = typeCode === 'ENT' || typeCode === 'ENTRANT';
+  const isSortant = typeCode === 'SOR' || typeCode === 'SORTANT';
 
-  const getTypeColor = () => {
-    const isEntrant = courrier.id_expediteur ? true : false;
-    return isEntrant 
-      ? 'text-purple-400 bg-purple-500/20' 
-      : 'text-blue-400 bg-blue-500/20';
-  };
+  // Icône et couleur en fonction du type
+  const TypeIcon = isEntrant ? Mail : Send;
+  const typeColorClass = isEntrant 
+    ? 'text-purple-400 bg-purple-500/20' 
+    : 'text-blue-400 bg-blue-500/20';
+  const typeLabel = isEntrant ? 'Entrant' : 'Sortant';
 
-  const getTypeLabel = () => {
-    const isEntrant = courrier.id_expediteur ? true : false;
-    return isEntrant ? 'Entrant' : 'Sortant';
-  };
-
+  // Statut
+  const statut = courrier.id_statut?.libelle_statut || 'En attente';
   const getStatutIcon = () => {
-    const statut = courrier.id_statut?.libelle_statut || '';
     switch (statut.toUpperCase()) {
       case 'EN_ATTENTE':
       case 'AFFECTE':
@@ -61,9 +57,8 @@ export const CourrierCard: React.FC<Props> = ({
         return Clock;
     }
   };
-
+  const StatutIcon = getStatutIcon();
   const getStatutColor = () => {
-    const statut = courrier.id_statut?.libelle_statut || '';
     switch (statut.toUpperCase()) {
       case 'EN_ATTENTE':
       case 'AFFECTE':
@@ -77,7 +72,9 @@ export const CourrierCard: React.FC<Props> = ({
     }
   };
 
-  const formatDate = (dateString: string) => {
+  // Formatage de la date
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Non renseignée';
     try {
       return new Date(dateString).toLocaleDateString('fr-FR');
     } catch {
@@ -85,8 +82,9 @@ export const CourrierCard: React.FC<Props> = ({
     }
   };
 
-  const TypeIcon = getTypeIcon();
-  const StatutIcon = getStatutIcon();
+  // Libellé de la date selon le type
+  const dateLabel = isEntrant ? 'Reçu le' : 'Émis le';
+  const dateValue = isEntrant ? courrier.date_reception : courrier.date_envoi || courrier.date_reception;
 
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-slate-600 transition-all duration-200 flex flex-col h-full">
@@ -94,17 +92,17 @@ export const CourrierCard: React.FC<Props> = ({
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
         {/* Badges à gauche */}
         <div className="flex items-center gap-3 flex-shrink-0">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getTypeColor()}`}>
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${typeColorClass}`}>
             <TypeIcon className="w-5 h-5" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`px-2 py-1 rounded text-xs font-medium ${getTypeColor()}`}>
-                {getTypeLabel()}
+              <span className={`px-2 py-1 rounded text-xs font-medium ${typeColorClass}`}>
+                {typeLabel}
               </span>
               <span className={`px-2 py-1 rounded text-xs flex items-center gap-1 ${getStatutColor()}`}>
                 <StatutIcon className="w-3 h-3" />
-                {courrier.id_statut?.libelle_statut || 'En attente'}
+                {statut}
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
@@ -113,54 +111,30 @@ export const CourrierCard: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Actions en haut à droite - avec wrap et espacement */}
+        {/* Actions */}
         <div className="flex flex-wrap items-center gap-1">
           {onEdit && (
-            <button
-              onClick={() => onEdit(courrier)}
-              className="p-2 text-slate-400 hover:text-green-400 hover:bg-slate-700 rounded-lg transition-colors"
-              title="Modifier"
-            >
+            <button onClick={() => onEdit(courrier)} className="p-2 text-slate-400 hover:text-green-400 hover:bg-slate-700 rounded-lg" title="Modifier">
               <Edit className="w-4 h-4" />
             </button>
           )}
-
           {onAffecter && (
-            <button
-              onClick={() => onAffecter(courrier)}
-              className="p-2 text-slate-400 hover:text-orange-400 hover:bg-slate-700 rounded-lg transition-colors"
-              title="Affecter à un utilisateur"
-            >
+            <button onClick={() => onAffecter(courrier)} className="p-2 text-slate-400 hover:text-orange-400 hover:bg-slate-700 rounded-lg" title="Affecter">
               <Users className="w-4 h-4" />
             </button>
           )}
-
           {showSendToUser && onSendToUser && (
-            <button
-              onClick={() => onSendToUser(courrier)}
-              className="p-2 text-slate-400 hover:text-purple-400 hover:bg-slate-700 rounded-lg transition-colors"
-              title="Envoyer à un utilisateur"
-            >
+            <button onClick={() => onSendToUser(courrier)} className="p-2 text-slate-400 hover:text-purple-400 hover:bg-slate-700 rounded-lg" title="Envoyer à un utilisateur">
               <Users className="w-4 h-4" />
             </button>
           )}
-
           {showSendToDG && onSendToDG && (
-            <button
-              onClick={() => onSendToDG(courrier)}
-              className="p-2 text-slate-400 hover:text-yellow-400 hover:bg-slate-700 rounded-lg transition-colors"
-              title="Envoyer au Directeur Général"
-            >
+            <button onClick={() => onSendToDG(courrier)} className="p-2 text-slate-400 hover:text-yellow-400 hover:bg-slate-700 rounded-lg" title="Envoyer au DG">
               <Crown className="w-4 h-4" />
             </button>
           )}
-
           {onDelete && (
-            <button
-              onClick={() => onDelete(courrier)}
-              className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg transition-colors"
-              title="Supprimer"
-            >
+            <button onClick={() => onDelete(courrier)} className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg" title="Supprimer">
               <Trash2 className="w-4 h-4" />
             </button>
           )}
@@ -177,7 +151,7 @@ export const CourrierCard: React.FC<Props> = ({
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
           <span className="text-slate-300">
-            Reçu le {formatDate(courrier.date_reception)}
+            {dateLabel} {formatDate(dateValue)}
           </span>
         </div>
 
@@ -185,7 +159,7 @@ export const CourrierCard: React.FC<Props> = ({
           <div className="flex items-center gap-2 text-sm">
             <Building className="w-4 h-4 text-slate-400 flex-shrink-0" />
             <span className="text-slate-300 truncate">
-              De : {courrier.id_expediteur.nom_de_structure}
+              {isEntrant ? 'De :' : 'Expéditeur :'} {courrier.id_expediteur.nom_de_structure}
             </span>
           </div>
         )}
@@ -194,7 +168,7 @@ export const CourrierCard: React.FC<Props> = ({
           <div className="flex items-center gap-2 text-sm">
             <User className="w-4 h-4 text-slate-400 flex-shrink-0" />
             <span className="text-slate-300 truncate">
-              À : {courrier.id_destinataire.nom_de_structure}
+              {isEntrant ? 'À :' : 'Destinataire :'} {courrier.id_destinataire.nom_de_structure}
             </span>
           </div>
         )}
@@ -217,7 +191,7 @@ export const CourrierCard: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Bouton Voir les détails - UN SEUL bouton en bas */}
+      {/* Bouton Voir les détails */}
       <div className="flex items-center justify-center pt-4 mt-auto border-t border-slate-600">
         <button
           onClick={() => onView?.(courrier)}
