@@ -14,7 +14,7 @@ export const RapportsPage: React.FC = () => {
         <Navbar />
         <div className="flex">
           <Sidebar />
-          <main className="flex-1 p-8">
+          <main className="flex-1 pt-24 p-8">
             <div className="max-w-7xl mx-auto text-center py-20">
               <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                 <BarChart3 className="w-8 h-8 text-slate-600" />
@@ -87,7 +87,7 @@ export const RapportsPage: React.FC = () => {
       <div className="flex">
         <Sidebar />
         
-        <main className="flex-1 p-8">
+        <main className="flex-1 pt-24 p-8">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8 flex items-center justify-between">
               <div>
