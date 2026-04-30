@@ -16,9 +16,12 @@ import { AdminUserManagement } from '../pages/AdminUserManagement';
 import { UtilisateursPage } from '../pages/UtilisateursPage';
 import { MaBoiteReception } from '../pages/MaBoiteReception';
 import { NotificationsPage } from '../pages/NotificationsPage';
-import { MesCourriersPage } from '../pages/MesCourriersPage'; // ← AJOUT DE L'IMPORT
+import { MesCourriersPage } from '../pages/MesCourriersPage';
 import { ModifierCourrierPage } from '../pages/ModifierCourrierPage';
 import { ChangePasswordPage } from '../pages/ChangePasswordPage';
+// NOUVEAUX IMPORTS
+import { NouveauCourrierEntrantPage } from '../pages/NouveauCourrierEntrantPage';
+import { NouveauCourrierSortantPage } from '../pages/NouveauCourrierSortantPage';
 
 export const AppRoutes: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -52,13 +55,13 @@ export const AppRoutes: React.FC = () => {
           }
         />
         <Route
-  path="/notifications"
-  element={
-    <ProtectedRoute>
-      <NotificationsPage />
-    </ProtectedRoute>
-  }
-/>
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/courriers"
           element={
@@ -99,7 +102,23 @@ export const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        {/* ← NOUVELLE ROUTE AJOUTÉE */}
+        {/* NOUVELLES ROUTES POUR COURRIERS ENTRANT/SORTANT */}
+        <Route
+          path="/nouveau-courrier-entrant"
+          element={
+            <ProtectedRoute>
+              <NouveauCourrierEntrantPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/nouveau-courrier-sortant"
+          element={
+            <ProtectedRoute>
+              <NouveauCourrierSortantPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/mes-courriers"
           element={
@@ -108,7 +127,6 @@ export const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        // Ajoutez cette route avec les autres routes protégées
         <Route
           path="/modifier-courrier/:id"
           element={
@@ -117,8 +135,6 @@ export const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
-
-        // Ajoutez cette route avec les autres routes protégées
         <Route
           path="/changer-mot-de-passe"
           element={
@@ -127,7 +143,6 @@ export const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/rapports"
           element={
