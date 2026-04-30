@@ -59,10 +59,8 @@ export const NouveauCourrierPage: React.FC = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Navbar />
-
-        <main className="flex-1 flex flex-col justify-center px-6 md:px-12 py-12">
+        <main className="flex-1 flex flex-col justify-center px-6 md:px-12 py-12 pt-20">
           <div className="max-w-4xl mx-auto w-full">
-
             {/* Retour */}
             <button
               onClick={() => navigate(-1)}
