@@ -21,7 +21,7 @@ export const NouveauCourrierPage: React.FC = () => {
       <Sidebar />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Navbar />
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px 40px' }}>
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '80px 40px 48px 40px' }}>
           <div style={{ maxWidth: 860, margin: '0 auto', width: '100%' }}>
 
             {/* Retour */}

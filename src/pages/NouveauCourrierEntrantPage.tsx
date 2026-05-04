@@ -58,7 +58,7 @@ const FICHE_SECTIONS = [
 // Styles partagés
 const S = {
   page: { minHeight: '100vh', display: 'flex', background: '#f7f8fa', fontFamily: "'Segoe UI', system-ui, sans-serif" } as React.CSSProperties,
-  main: { flex: 1, overflowY: 'auto', padding: '32px 40px' } as React.CSSProperties,
+  main: { flex: 1, overflowY: 'auto', padding: '80px 40px 32px 40px' } as React.CSSProperties,
   wrap: { maxWidth: 900, margin: '0 auto' } as React.CSSProperties,
   section: { background: 'white', border: '1px solid #e5e7eb', borderRadius: 10, padding: '24px 28px', marginBottom: 16 } as React.CSSProperties,
   sectionTitle: { fontSize: 13, fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18, paddingBottom: 12, borderBottom: '1px solid #f3f4f6' } as React.CSSProperties,
