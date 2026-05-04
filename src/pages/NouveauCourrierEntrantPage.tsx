@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, ArrowDownLeft, Send, FileText, Plus, X, Check,
   Loader2, Building, User, Mail, Phone, MapPin, Hash,
-  Calendar, Tag, AlertTriangle, Paperclip, Info, Lock,
+  Calendar, Tag, AlertTriangle, Paperclip, Lock,
 } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
@@ -15,8 +15,6 @@ import { expediteurApi } from '../api/expediteurApi';
 import { destinataireApi } from '../api/destinataireApi';
 import { typeCourrierApi } from '../api/typeCourrierApi';
 import { statutApi } from '../api/statutApi';
-
-// ── Types ──────────────────────────────────────────────────────────────────────
 
 type UserForAssign = { id: number; nom: string; prenom: string; email?: string; role?: string };
 
@@ -31,8 +29,6 @@ interface FicheState {
   bordeauEnvoi: boolean; pourInformation: boolean; aTouteFinUtile: boolean;
   enInstance: boolean; aClasser: boolean; courrierReserve: boolean;
 }
-
-// ── Constantes ─────────────────────────────────────────────────────────────────
 
 const MODES_RECEPTION = ['', 'Courrier postal', 'Remis en main propre', 'Email', 'Fax', 'Coursier'];
 const CONFIDENTIALITES = ['PUBLIC', 'INTERNE', 'CONFIDENTIEL', 'SECRET'];
@@ -51,20 +47,31 @@ const FICHE_INITIALE: FicheState = {
 };
 
 const FICHE_SECTIONS = [
-  { label: 'Priorité', color: 'bg-red-500', items: [{ name: 'tresUrgent', label: '🔴 TRÈS URGENT', color: 'text-red-600 font-semibold' }, { name: 'urgent', label: '🟠 URGENT', color: 'text-orange-600 font-semibold' }] },
-  { label: 'Actions principales', color: 'bg-blue-500', items: [{ name: 'pourAttribution', label: 'Pour attribution' }, { name: 'pourEtudeEtAvis', label: 'Pour étude et avis' }, { name: 'pourSuiteADonner', label: 'Pour suite à donner' }, { name: 'pourInformation', label: 'Pour information' }] },
-  { label: 'Communications', color: 'bg-green-500', items: [{ name: 'menParler', label: "M'en parler" }, { name: 'meRepresenter', label: 'Me représenter' }, { name: 'copieA', label: 'Copie à' }, { name: 'notePourLeDG', label: 'Note pour le DG' }] },
-  { label: 'Actions secondaires', color: 'bg-yellow-500', items: [{ name: 'pourDisposition', label: 'Pour disposition à prendre' }, { name: 'elementDeReponse', label: 'Pour élément de réponse' }, { name: 'pourVisaPrealable', label: 'Pour visa préalable' }, { name: 'pourNecessaire', label: 'Pour le nécessaire à faire' }] },
-  { label: 'Traitement', color: 'bg-indigo-500', items: [{ name: 'finRetour', label: 'Fin retour' }, { name: 'pourResumerSuccinct', label: 'Pour résumer succinct' }, { name: 'noteMinistre', label: "Note au Ministre" }, { name: 'pourEtude', label: 'Pour étude en rapport avec' }] },
-  { label: 'Classement', color: 'bg-purple-500', items: [{ name: 'lettreDeTransmission', label: 'Lettre de transmission à' }, { name: 'bordeauEnvoi', label: "Bordereau d'envoi" }, { name: 'enInstance', label: 'En instance' }, { name: 'aClasser', label: 'À classer' }, { name: 'courrierReserve', label: 'Courrier réservé' }, { name: 'aTouteFinUtile', label: 'À toute fin utile' }] },
+  { label: 'Priorité', color: '#ef4444', items: [{ name: 'tresUrgent', label: 'TRÈS URGENT', color: '#dc2626' }, { name: 'urgent', label: 'URGENT', color: '#ea580c' }] },
+  { label: 'Actions principales', color: '#3b82f6', items: [{ name: 'pourAttribution', label: 'Pour attribution' }, { name: 'pourEtudeEtAvis', label: 'Pour étude et avis' }, { name: 'pourSuiteADonner', label: 'Pour suite à donner' }, { name: 'pourInformation', label: 'Pour information' }] },
+  { label: 'Communications', color: '#16a34a', items: [{ name: 'menParler', label: "M'en parler" }, { name: 'meRepresenter', label: 'Me représenter' }, { name: 'copieA', label: 'Copie à' }, { name: 'notePourLeDG', label: 'Note pour le DG' }] },
+  { label: 'Actions secondaires', color: '#d97706', items: [{ name: 'pourDisposition', label: 'Pour disposition à prendre' }, { name: 'elementDeReponse', label: 'Pour élément de réponse' }, { name: 'pourVisaPrealable', label: 'Pour visa préalable' }, { name: 'pourNecessaire', label: 'Pour le nécessaire à faire' }] },
+  { label: 'Traitement', color: '#6366f1', items: [{ name: 'finRetour', label: 'Fin retour' }, { name: 'pourResumerSuccinct', label: 'Pour résumer succinct' }, { name: 'noteMinistre', label: 'Note au Ministre' }, { name: 'pourEtude', label: 'Pour étude en rapport avec' }] },
+  { label: 'Classement', color: '#7c3aed', items: [{ name: 'lettreDeTransmission', label: 'Lettre de transmission à' }, { name: 'bordeauEnvoi', label: "Bordereau d'envoi" }, { name: 'enInstance', label: 'En instance' }, { name: 'aClasser', label: 'À classer' }, { name: 'courrierReserve', label: 'Courrier réservé' }, { name: 'aTouteFinUtile', label: 'À toute fin utile' }] },
 ];
 
-// ── Composant ──────────────────────────────────────────────────────────────────
+// Styles partagés
+const S = {
+  page: { minHeight: '100vh', display: 'flex', background: '#f7f8fa', fontFamily: "'Segoe UI', system-ui, sans-serif" } as React.CSSProperties,
+  main: { flex: 1, overflowY: 'auto', padding: '32px 40px' } as React.CSSProperties,
+  wrap: { maxWidth: 900, margin: '0 auto' } as React.CSSProperties,
+  section: { background: 'white', border: '1px solid #e5e7eb', borderRadius: 10, padding: '24px 28px', marginBottom: 16 } as React.CSSProperties,
+  sectionTitle: { fontSize: 13, fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18, paddingBottom: 12, borderBottom: '1px solid #f3f4f6' } as React.CSSProperties,
+  grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 } as React.CSSProperties,
+  grid3: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 } as React.CSSProperties,
+  lbl: { display: 'block', fontSize: 11, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 6 } as React.CSSProperties,
+  inp: { width: '100%', background: '#fafafa', border: '1px solid #e5e7eb', borderRadius: 7, padding: '9px 12px', fontSize: 13, color: '#111827', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s' } as React.CSSProperties,
+  sel: { width: '100%', background: '#fafafa', border: '1px solid #e5e7eb', borderRadius: 7, padding: '9px 12px', fontSize: 13, color: '#111827', outline: 'none', boxSizing: 'border-box' } as React.CSSProperties,
+};
 
 export const NouveauCourrierEntrantPage: React.FC = () => {
   const navigate = useNavigate();
 
-  // Champs principaux
   const [objet, setObjet] = useState('');
   const [dateReception, setDateReception] = useState(new Date().toISOString().split('T')[0]);
   const [dateDocument, setDateDocument] = useState('');
@@ -75,17 +82,9 @@ export const NouveauCourrierEntrantPage: React.FC = () => {
   const [dossierLie, setDossierLie] = useState('');
   const [tagList, setTagList] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
-
-  // Expéditeur
   const [expediteur, setExpediteur] = useState({ nomDeStructure: '', nomDuResponsable: '', adresseGeographique: '', adresseEmail: '', tel: '', typeStructure: '' });
-
-  // Destinataire
   const [destinataire, setDestinataire] = useState({ nomDeStructure: 'INSEED', nomDuResponsable: '', adresseGeographique: 'Lomé, Togo', adresseEmail: 'contact@inseed.tg', tel: '+228 22 25 36 00' });
-
-  // Fiche
   const [fiche, setFiche] = useState<FicheState>(FICHE_INITIALE);
-
-  // Autres
   const [file, setFile] = useState<File | null>(null);
   const [affectations, setAffectations] = useState<{ utilisateurId: number; utilisateurNom: string; commentaire?: string }[]>([]);
   const [showAffectModal, setShowAffectModal] = useState(false);
@@ -98,7 +97,6 @@ export const NouveauCourrierEntrantPage: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [assignComment, setAssignComment] = useState('');
 
-  // Chargement utilisateurs
   useEffect(() => {
     if (!showAffectModal) return;
     setLoadingUsers(true);
@@ -108,7 +106,6 @@ export const NouveauCourrierEntrantPage: React.FC = () => {
       .finally(() => setLoadingUsers(false));
   }, [showAffectModal]);
 
-  // Handlers
   const handleFicheChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
@@ -118,7 +115,7 @@ export const NouveauCourrierEntrantPage: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (!['application/pdf', 'image/jpeg', 'image/png'].includes(f.type)) { setError('Format non supporté. PDF, JPG ou PNG.'); return; }
+    if (!['application/pdf', 'image/jpeg', 'image/png'].includes(f.type)) { setError('Format non supporté. PDF, JPG ou PNG uniquement.'); return; }
     if (f.size > 10 * 1024 * 1024) { setError('Fichier trop volumineux (max 10 Mo).'); return; }
     setFile(f); setError(null);
   };
@@ -137,27 +134,22 @@ export const NouveauCourrierEntrantPage: React.FC = () => {
     setSelectedUserId(null); setAssignComment(''); setShowAffectModal(false); setError(null);
   };
 
-  // Soumission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!objet.trim()) return setError("L'objet est obligatoire.");
     if (!dateReception) return setError('La date de réception est obligatoire.');
     if (!expediteur.nomDeStructure.trim()) return setError("Le nom de la structure expéditeur est obligatoire.");
-
     setSending(true);
     try {
-      // Expéditeur
       const allExp = await expediteurApi.getAll();
       let exp = allExp.find(e => e.nom_de_structure?.trim().toLowerCase() === expediteur.nomDeStructure.trim().toLowerCase());
-      if (!exp) exp = await expediteurApi.create({ nom_de_structure: expediteur.nomDeStructure.trim(), nom_du_responsable: expediteur.nomDuResponsable.trim() || 'Non renseigné', adresse_geographique: expediteur.adresseGeographique.trim() || 'Non renseignée', adresse_email: expediteur.adresseEmail.trim() || 'non-renseigne@example.com', tel: expediteur.tel.trim() || '00000000', type_structure: expediteur.typeStructure.trim() || 'Autre' });
+      if (!exp) exp = await expediteurApi.create({ nom_de_structure: expediteur.nomDeStructure.trim(), nom_du_responsable: expediteur.nomDuResponsable.trim() || 'Non renseigné', adresse_geographique: expediteur.adresseGeographique.trim() || 'Non renseignée', adresse_email: expediteur.adresseEmail.trim() || 'non-renseigne@example.com', tel: expediteur.tel.trim() || '00000000', type_structure: expediteur.typeStructure || 'Autre' });
 
-      // Destinataire
       const allDest = await destinataireApi.getAll();
       let dest = allDest.find(d => d.nom_de_structure?.trim().toLowerCase() === destinataire.nomDeStructure.trim().toLowerCase());
       if (!dest) dest = await destinataireApi.create({ nom_de_structure: destinataire.nomDeStructure.trim(), nom_du_responsable: destinataire.nomDuResponsable.trim() || 'Non renseigné', adresse_geographique: destinataire.adresseGeographique.trim() || 'Non renseignée', adresse_email: destinataire.adresseEmail.trim() || 'contact@inseed.tg', tel: destinataire.tel.trim() || '00000000' });
 
-      // Type & Statut
       const types = await typeCourrierApi.getAll();
       const typeMatch = types.find((t: any) => t.code?.toUpperCase() === 'ENT' || t.code?.toUpperCase() === 'ENTRANT' || t.libelle?.toLowerCase().includes('entrant'));
       const statutsRaw = await statutApi.getAll();
@@ -168,14 +160,10 @@ export const NouveauCourrierEntrantPage: React.FC = () => {
       if (!statutMatch) { setError('Statut "En attente" introuvable.'); setSending(false); return; }
 
       const ficheRemplie = !!(fiche.reference || fiche.observation || fiche.tresUrgent || fiche.urgent);
-
       const dto: any = {
-        objet: objet.trim(),
-        dateReception,
-        idExpediteur: exp!.id_expediteur,
-        idDestinataire: dest!.id_destinataire,
-        idTypeCourrier: typeMatch.id_type_courrier,
-        idStatut: statutMatch.id_statut,
+        objet: objet.trim(), dateReception,
+        idExpediteur: exp!.id_expediteur, idDestinataire: dest!.id_destinataire,
+        idTypeCourrier: typeMatch.id_type_courrier, idStatut: statutMatch.id_statut,
         ...(referenceExterne && { referenceExterne: referenceExterne.trim() }),
         ...(dateDocument && { dateDocument }),
         ...(modeReception && { modeReception }),
@@ -189,17 +177,15 @@ export const NouveauCourrierEntrantPage: React.FC = () => {
       const formData = new FormData();
       formData.append('courrier', JSON.stringify(dto));
       if (file) formData.append('file', file);
-
       const response = await axiosInstance.post('/api/courriers/creer-complet', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       const created = response.data.courrier || response.data;
 
       if (affectations.length > 0) {
         const courrierId = created?.id || created?.idCourrier;
         for (const a of affectations) {
-          try { await affectationApi.ajouter({ courrierId, utilisateurId: a.utilisateurId, commentaire: a.commentaire || '' }); } catch { /* non bloquant */ }
+          try { await affectationApi.ajouter({ courrierId, utilisateurId: a.utilisateurId, commentaire: a.commentaire || '' }); } catch { }
         }
       }
-
       setSuccessMsg('Courrier entrant enregistré avec succès !');
       setTimeout(() => navigate('/courriers'), 1800);
     } catch (err: any) {
@@ -209,277 +195,242 @@ export const NouveauCourrierEntrantPage: React.FC = () => {
     }
   };
 
-  // ── Styles utilitaires ────────────────────────────────────────────────────
-  const inp = "w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500/30 transition-all text-sm";
-  const lbl = "block text-slate-300 text-xs font-semibold mb-1.5 uppercase tracking-wide";
-  const sec = "bg-slate-800/40 border border-slate-700/60 rounded-xl p-5";
+  const focusStyle = (color: string) => ({
+    onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => { e.target.style.borderColor = color; e.target.style.background = 'white'; },
+    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => { e.target.style.borderColor = '#e5e7eb'; e.target.style.background = '#fafafa'; },
+  });
+
+  const F = focusStyle('#16a34a');
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-slate-900 to-slate-900 text-white">
+    <div style={S.page}>
       <Sidebar />
-      <div className="flex-1 flex flex-col">
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Navbar />
-        <main className="flex-1 overflow-y-auto px-6 md:px-10 pt-24 pb-8">
-          <div className="max-w-5xl mx-auto">
+        <main style={S.main}>
+          <div style={S.wrap}>
 
             {/* Header */}
-            <div className="flex items-center gap-4 mb-8">
-              <button onClick={() => navigate('/nouveau-courrier')}
-                className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-500 transition-all">
-                <ArrowLeft className="w-4 h-4" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28 }}>
+              <button onClick={() => navigate('/nouveau-courrier')} style={{ width: 34, height: 34, border: '1px solid #e5e7eb', borderRadius: 8, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280', flexShrink: 0 }}>
+                <ArrowLeft size={15} />
               </button>
-              <div className="flex items-center gap-3 flex-1">
-                <div className="w-10 h-10 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center">
-                  <ArrowDownLeft className="w-5 h-5 text-green-400" />
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 38, height: 38, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowDownLeft size={18} color="#16a34a" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-bold text-white">Nouveau courrier entrant</h1>
-                    <span className="text-xs font-bold px-2 py-0.5 rounded bg-green-500/15 text-green-400 border border-green-500/20 tracking-wider">
-                      ARRIVÉE
-                    </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <h1 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: 0 }}>Nouveau courrier entrant</h1>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', letterSpacing: '1px' }}>ARRIVÉE</span>
                   </div>
-                  <p className="text-slate-400 text-xs mt-0.5">Registre CA-{new Date().getFullYear()}-XXXX • Numérotation automatique</p>
+                  <p style={{ fontSize: 12, color: '#9ca3af', margin: '2px 0 0' }}>Registre CA-{new Date().getFullYear()}-XXXX — Numérotation automatique</p>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setShowAffectModal(true)}
-                  className="flex items-center gap-2 px-3 py-2 bg-blue-600/80 hover:bg-blue-600 rounded-lg text-sm font-medium transition-colors">
-                  <Plus className="w-4 h-4" /> Affecter
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" onClick={() => setShowAffectModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, color: '#1d4ed8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                  <Plus size={14} /> Affecter
                 </button>
-                <button type="button" onClick={() => setShowFicheModal(true)}
-                  className="flex items-center gap-2 px-3 py-2 bg-emerald-600/80 hover:bg-emerald-600 rounded-lg text-sm font-medium transition-colors">
-                  <Check className="w-4 h-4" /> Fiche
-                  {(fiche.tresUrgent || fiche.urgent || fiche.reference) && (
-                    <span className="w-2 h-2 bg-orange-400 rounded-full" />
-                  )}
+                <button type="button" onClick={() => setShowFicheModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, color: '#16a34a', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                  <FileText size={14} /> Fiche
+                  {(fiche.tresUrgent || fiche.urgent || fiche.reference) && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f97316' }} />}
                 </button>
               </div>
             </div>
 
             {/* Messages */}
             {error && (
-              <div className="mb-5 flex items-center gap-3 p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl text-red-300 text-sm">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0" /> {error}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, marginBottom: 16 }}>
+                <AlertTriangle size={15} color="#dc2626" />
+                <span style={{ fontSize: 13, color: '#dc2626' }}>{error}</span>
               </div>
             )}
             {successMsg && (
-              <div className="mb-5 flex items-center gap-3 p-3.5 bg-green-500/10 border border-green-500/30 rounded-xl text-green-300 text-sm">
-                <Check className="w-4 h-4 flex-shrink-0" /> {successMsg}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, marginBottom: 16 }}>
+                <Check size={15} color="#16a34a" />
+                <span style={{ fontSize: 13, color: '#16a34a' }}>{successMsg}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit}>
 
-              {/* ── Section 1 : Informations du courrier ── */}
-              <div className={sec}>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
-                  <Info className="w-4 h-4 text-green-400" /> Informations du courrier
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-3">
-                    <label className={lbl}>Objet *</label>
-                    <input type="text" value={objet} onChange={e => setObjet(e.target.value)}
-                      placeholder="Décrivez brièvement l'objet du courrier..." className={inp} required />
+              {/* Section 1 : Informations générales */}
+              <div style={S.section}>
+                <div style={S.sectionTitle}>
+                  <div style={{ width: 6, height: 16, background: '#16a34a', borderRadius: 3 }} />
+                  Informations générales
+                </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={S.lbl}>Objet du courrier *</label>
+                  <input style={{ ...S.inp, width: '100%' }} value={objet} onChange={e => setObjet(e.target.value)} placeholder="Décrivez brièvement l'objet du courrier..." required {...F} />
+                </div>
+                <div style={S.grid3}>
+                  <div>
+                    <label style={S.lbl}>Date de réception *</label>
+                    <input type="date" style={S.inp} value={dateReception} onChange={e => setDateReception(e.target.value)} required {...F} />
                   </div>
                   <div>
-                    <label className={lbl}><Calendar className="w-3 h-3 inline mr-1" />Date de réception *</label>
-                    <input type="date" value={dateReception} onChange={e => setDateReception(e.target.value)} className={inp} required />
+                    <label style={S.lbl}>Date du document</label>
+                    <input type="date" style={S.inp} value={dateDocument} onChange={e => setDateDocument(e.target.value)} {...F} />
+                    <p style={{ fontSize: 11, color: '#9ca3af', margin: '4px 0 0' }}>Date inscrite sur le document original</p>
                   </div>
                   <div>
-                    <label className={lbl}><Calendar className="w-3 h-3 inline mr-1" />Date du document</label>
-                    <input type="date" value={dateDocument} onChange={e => setDateDocument(e.target.value)} className={inp} />
-                    <p className="text-slate-500 text-xs mt-1">Date inscrite sur le document original</p>
-                  </div>
-                  <div>
-                    <label className={lbl}>Mode de réception</label>
-                    <select value={modeReception} onChange={e => setModeReception(e.target.value)} className={inp}>
+                    <label style={S.lbl}>Mode de réception</label>
+                    <select style={S.sel} value={modeReception} onChange={e => setModeReception(e.target.value)} {...F}>
                       {MODES_RECEPTION.map(m => <option key={m} value={m}>{m || 'Sélectionner...'}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={lbl}><Hash className="w-3 h-3 inline mr-1" />Référence expéditeur</label>
-                    <input type="text" value={referenceExterne} onChange={e => setReferenceExterne(e.target.value)}
-                      placeholder="Ex : REF-MIN-2026-042" className={inp} />
+                    <label style={S.lbl}>Référence expéditeur</label>
+                    <input style={S.inp} value={referenceExterne} onChange={e => setReferenceExterne(e.target.value)} placeholder="Ex : REF-MIN-2026-042" {...F} />
                   </div>
                   <div>
-                    <label className={lbl}><Calendar className="w-3 h-3 inline mr-1" />Délai de réponse (jours)</label>
-                    <input type="number" min={1} max={365} value={delaiReponse}
-                      onChange={e => setDelaiReponse(e.target.value === '' ? '' : Number(e.target.value))}
-                      placeholder="Ex : 15" className={inp} />
+                    <label style={S.lbl}>Délai de réponse (jours)</label>
+                    <input type="number" min={1} max={365} style={S.inp} value={delaiReponse} onChange={e => setDelaiReponse(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Ex : 15" {...F} />
                   </div>
                   <div>
-                    <label className={lbl}><Lock className="w-3 h-3 inline mr-1" />Confidentialité</label>
-                    <select value={confidentialite} onChange={e => setConfidentialite(e.target.value)} className={inp}>
+                    <label style={S.lbl}>Confidentialité</label>
+                    <select style={S.sel} value={confidentialite} onChange={e => setConfidentialite(e.target.value)} {...F}>
                       {CONFIDENTIALITES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
                 </div>
-
-                {/* Tags */}
-                <div className="mt-4">
-                  <label className={lbl}><Tag className="w-3 h-3 inline mr-1" />Mots-clés</label>
-                  <div className="flex gap-2">
-                    <input type="text" value={tagInput} onChange={e => setTagInput(e.target.value)}
+                <div style={{ marginTop: 14 }}>
+                  <label style={S.lbl}>Dossier / Affaire lié(e)</label>
+                  <input style={{ ...S.inp, width: '100%' }} value={dossierLie} onChange={e => setDossierLie(e.target.value)} placeholder="Ex : Projet statistiques 2026" {...F} />
+                </div>
+                <div style={{ marginTop: 14 }}>
+                  <label style={S.lbl}>Mots-clés</label>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input style={{ ...S.inp, flex: 1 }} value={tagInput} onChange={e => setTagInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
-                      placeholder="Ajoutez un mot-clé et appuyez sur Entrée" className={`${inp} flex-1`} />
-                    <button type="button" onClick={addTag}
-                      className="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
-                      <Plus className="w-4 h-4" />
+                      placeholder="Tapez un mot-clé et appuyez sur Entrée" {...F} />
+                    <button type="button" onClick={addTag} style={{ padding: '9px 14px', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 7, cursor: 'pointer', color: '#374151' }}>
+                      <Plus size={15} />
                     </button>
                   </div>
                   {tagList.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
                       {tagList.map(t => (
-                        <span key={t} className="flex items-center gap-1 px-3 py-1 bg-green-500/15 border border-green-500/25 rounded-full text-green-300 text-xs font-medium">
+                        <span key={t} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 20, fontSize: 12, color: '#16a34a', fontWeight: 500 }}>
                           {t}
-                          <button type="button" onClick={() => setTagList(p => p.filter(x => x !== t))} className="hover:text-white ml-1">
-                            <X className="w-3 h-3" />
+                          <button type="button" onClick={() => setTagList(p => p.filter(x => x !== t))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#16a34a', padding: 0, display: 'flex' }}>
+                            <X size={12} />
                           </button>
                         </span>
                       ))}
                     </div>
                   )}
                 </div>
-
-                {/* Dossier lié */}
-                <div className="mt-4">
-                  <label className={lbl}><FileText className="w-3 h-3 inline mr-1" />Dossier / Affaire lié(e)</label>
-                  <input type="text" value={dossierLie} onChange={e => setDossierLie(e.target.value)}
-                    placeholder="Ex : Projet statistiques 2026" className={inp} />
-                </div>
               </div>
 
-              {/* ── Section 2 : Expéditeur ── */}
-              <div className={sec}>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
-                  <Building className="w-4 h-4 text-green-400" /> Informations expéditeur
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Section 2 : Expéditeur */}
+              <div style={S.section}>
+                <div style={S.sectionTitle}>
+                  <div style={{ width: 6, height: 16, background: '#16a34a', borderRadius: 3 }} />
+                  Informations expéditeur
+                </div>
+                <div style={S.grid2}>
                   <div>
-                    <label className={lbl}><Building className="w-3 h-3 inline mr-1" />Nom de la structure *</label>
-                    <input name="nomDeStructure" value={expediteur.nomDeStructure}
-                      onChange={e => setExpediteur(p => ({ ...p, nomDeStructure: e.target.value }))}
-                      placeholder="Ex : Ministère de l'Économie" className={inp} required />
+                    <label style={S.lbl}>Nom de la structure *</label>
+                    <input style={S.inp} value={expediteur.nomDeStructure} onChange={e => setExpediteur(p => ({ ...p, nomDeStructure: e.target.value }))} placeholder="Ex : Ministère de l'Économie" required {...F} />
                   </div>
                   <div>
-                    <label className={lbl}><User className="w-3 h-3 inline mr-1" />Nom du responsable</label>
-                    <input value={expediteur.nomDuResponsable}
-                      onChange={e => setExpediteur(p => ({ ...p, nomDuResponsable: e.target.value }))}
-                      placeholder="Nom et prénom" className={inp} />
+                    <label style={S.lbl}>Nom du responsable</label>
+                    <input style={S.inp} value={expediteur.nomDuResponsable} onChange={e => setExpediteur(p => ({ ...p, nomDuResponsable: e.target.value }))} placeholder="Nom et prénom" {...F} />
                   </div>
                   <div>
-                    <label className={lbl}><Mail className="w-3 h-3 inline mr-1" />Email</label>
-                    <input type="email" value={expediteur.adresseEmail}
-                      onChange={e => setExpediteur(p => ({ ...p, adresseEmail: e.target.value }))}
-                      placeholder="contact@structure.tg" className={inp} />
+                    <label style={S.lbl}>Adresse email</label>
+                    <input type="email" style={S.inp} value={expediteur.adresseEmail} onChange={e => setExpediteur(p => ({ ...p, adresseEmail: e.target.value }))} placeholder="contact@structure.tg" {...F} />
                   </div>
                   <div>
-                    <label className={lbl}><Phone className="w-3 h-3 inline mr-1" />Téléphone</label>
-                    <input value={expediteur.tel}
-                      onChange={e => setExpediteur(p => ({ ...p, tel: e.target.value }))}
-                      placeholder="+228 XX XX XX XX" className={inp} />
+                    <label style={S.lbl}>Téléphone</label>
+                    <input style={S.inp} value={expediteur.tel} onChange={e => setExpediteur(p => ({ ...p, tel: e.target.value }))} placeholder="+228 XX XX XX XX" {...F} />
                   </div>
                   <div>
-                    <label className={lbl}><MapPin className="w-3 h-3 inline mr-1" />Adresse</label>
-                    <input value={expediteur.adresseGeographique}
-                      onChange={e => setExpediteur(p => ({ ...p, adresseGeographique: e.target.value }))}
-                      placeholder="Ville, Pays" className={inp} />
+                    <label style={S.lbl}>Adresse géographique</label>
+                    <input style={S.inp} value={expediteur.adresseGeographique} onChange={e => setExpediteur(p => ({ ...p, adresseGeographique: e.target.value }))} placeholder="Ville, Pays" {...F} />
                   </div>
                   <div>
-                    <label className={lbl}>Type de structure</label>
-                    <select value={expediteur.typeStructure}
-                      onChange={e => setExpediteur(p => ({ ...p, typeStructure: e.target.value }))} className={inp}>
+                    <label style={S.lbl}>Type de structure</label>
+                    <select style={S.sel} value={expediteur.typeStructure} onChange={e => setExpediteur(p => ({ ...p, typeStructure: e.target.value }))} {...F}>
                       {TYPES_STRUCTURE.map(t => <option key={t} value={t}>{t || 'Sélectionner...'}</option>)}
                     </select>
                   </div>
                 </div>
               </div>
 
-              {/* ── Section 3 : Destinataire ── */}
-              <div className={sec}>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
-                  <User className="w-4 h-4 text-green-400" /> Direction destinataire (INSEED)
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Section 3 : Destinataire */}
+              <div style={S.section}>
+                <div style={S.sectionTitle}>
+                  <div style={{ width: 6, height: 16, background: '#16a34a', borderRadius: 3 }} />
+                  Direction destinataire (INSEED)
+                </div>
+                <div style={S.grid2}>
                   <div>
-                    <label className={lbl}>Nom de la structure *</label>
-                    <input value={destinataire.nomDeStructure}
-                      onChange={e => setDestinataire(p => ({ ...p, nomDeStructure: e.target.value }))}
-                      placeholder="Ex : INSEED — Direction Générale" className={inp} required />
+                    <label style={S.lbl}>Nom de la structure *</label>
+                    <input style={S.inp} value={destinataire.nomDeStructure} onChange={e => setDestinataire(p => ({ ...p, nomDeStructure: e.target.value }))} placeholder="Ex : INSEED — Direction Générale" required {...F} />
                   </div>
                   <div>
-                    <label className={lbl}>Responsable</label>
-                    <input value={destinataire.nomDuResponsable}
-                      onChange={e => setDestinataire(p => ({ ...p, nomDuResponsable: e.target.value }))}
-                      placeholder="Nom du responsable" className={inp} />
+                    <label style={S.lbl}>Responsable</label>
+                    <input style={S.inp} value={destinataire.nomDuResponsable} onChange={e => setDestinataire(p => ({ ...p, nomDuResponsable: e.target.value }))} placeholder="Nom du responsable" {...F} />
                   </div>
                   <div>
-                    <label className={lbl}>Email</label>
-                    <input type="email" value={destinataire.adresseEmail}
-                      onChange={e => setDestinataire(p => ({ ...p, adresseEmail: e.target.value }))}
-                      className={inp} />
+                    <label style={S.lbl}>Email</label>
+                    <input type="email" style={S.inp} value={destinataire.adresseEmail} onChange={e => setDestinataire(p => ({ ...p, adresseEmail: e.target.value }))} {...F} />
                   </div>
                   <div>
-                    <label className={lbl}>Téléphone</label>
-                    <input value={destinataire.tel}
-                      onChange={e => setDestinataire(p => ({ ...p, tel: e.target.value }))}
-                      className={inp} />
+                    <label style={S.lbl}>Téléphone</label>
+                    <input style={S.inp} value={destinataire.tel} onChange={e => setDestinataire(p => ({ ...p, tel: e.target.value }))} {...F} />
                   </div>
                 </div>
               </div>
 
-              {/* ── Section 4 : Document joint ── */}
-              <div className={sec}>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
-                  <Paperclip className="w-4 h-4 text-green-400" /> Document joint
-                </h3>
-                <div
-                  className="border-2 border-dashed border-slate-600 hover:border-green-500/50 rounded-xl p-6 text-center cursor-pointer transition-colors"
-                  onClick={() => document.getElementById('fileInputEntrant')?.click()}
-                >
-                  <input id="fileInputEntrant" type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileChange} className="hidden" />
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center">
-                      <Paperclip className="w-5 h-5 text-slate-400" />
+              {/* Section 4 : Document joint */}
+              <div style={S.section}>
+                <div style={S.sectionTitle}>
+                  <div style={{ width: 6, height: 16, background: '#16a34a', borderRadius: 3 }} />
+                  Document joint
+                </div>
+                <div style={{ border: '1.5px dashed #d1d5db', borderRadius: 8, padding: '24px', textAlign: 'center', cursor: 'pointer', background: '#fafafa' }}
+                  onClick={() => document.getElementById('fileEntrant')?.click()}>
+                  <input id="fileEntrant" type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileChange} style={{ display: 'none' }} />
+                  <Paperclip size={22} color="#9ca3af" style={{ margin: '0 auto 8px' }} />
+                  {file ? (
+                    <div>
+                      <p style={{ fontSize: 13, color: '#111827', fontWeight: 600 }}>{file.name}</p>
+                      <p style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>{(file.size / 1024 / 1024).toFixed(2)} Mo</p>
                     </div>
-                    {file ? (
-                      <div>
-                        <p className="text-white font-medium text-sm">{file.name}</p>
-                        <p className="text-slate-400 text-xs">{(file.size / 1024 / 1024).toFixed(2)} Mo</p>
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-slate-300 text-sm font-medium">Cliquez pour sélectionner</p>
-                        <p className="text-slate-500 text-xs mt-0.5">PDF, JPG, PNG — max 10 Mo</p>
-                      </div>
-                    )}
-                  </div>
+                  ) : (
+                    <div>
+                      <p style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>Cliquez pour sélectionner un fichier</p>
+                      <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>PDF, JPG, PNG — max 10 Mo</p>
+                    </div>
+                  )}
                 </div>
                 {file && (
-                  <button type="button" onClick={() => setFile(null)}
-                    className="mt-2 text-red-400 hover:text-red-300 text-xs flex items-center gap-1">
-                    <X className="w-3 h-3" /> Supprimer
+                  <button type="button" onClick={() => setFile(null)} style={{ marginTop: 8, background: 'none', border: 'none', color: '#ef4444', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <X size={13} /> Supprimer le fichier
                   </button>
                 )}
               </div>
 
-              {/* ── Section 5 : Affectations ── */}
+              {/* Section 5 : Affectations */}
               {affectations.length > 0 && (
-                <div className={sec}>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
-                    <User className="w-4 h-4 text-green-400" /> Affectations ({affectations.length})
-                  </h3>
-                  <div className="space-y-2">
+                <div style={S.section}>
+                  <div style={S.sectionTitle}>
+                    <div style={{ width: 6, height: 16, background: '#16a34a', borderRadius: 3 }} />
+                    Affectations ({affectations.length})
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {affectations.map((a, i) => (
-                      <div key={i} className="flex items-center justify-between bg-slate-900/50 px-4 py-3 rounded-lg border border-slate-700">
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 8 }}>
                         <div>
-                          <p className="text-white text-sm font-medium">{a.utilisateurNom}</p>
-                          {a.commentaire && <p className="text-slate-400 text-xs">{a.commentaire}</p>}
+                          <p style={{ fontSize: 13, color: '#111827', fontWeight: 600, margin: 0 }}>{a.utilisateurNom}</p>
+                          {a.commentaire && <p style={{ fontSize: 12, color: '#6b7280', margin: '2px 0 0' }}>{a.commentaire}</p>}
                         </div>
-                        <button type="button" onClick={() => setAffectations(p => p.filter((_, j) => j !== i))}
-                          className="text-red-400 hover:text-red-300 transition-colors">
-                          <X className="w-4 h-4" />
+                        <button type="button" onClick={() => setAffectations(p => p.filter((_, j) => j !== i))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', display: 'flex' }}>
+                          <X size={16} />
                         </button>
                       </div>
                     ))}
@@ -487,15 +438,13 @@ export const NouveauCourrierEntrantPage: React.FC = () => {
                 </div>
               )}
 
-              {/* ── Actions ── */}
-              <div className="flex justify-end gap-3 pb-8">
-                <button type="button" onClick={() => navigate('/nouveau-courrier')}
-                  className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+              {/* Actions */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, paddingBottom: 40, paddingTop: 8 }}>
+                <button type="button" onClick={() => navigate('/nouveau-courrier')} style={{ padding: '10px 20px', background: 'white', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#374151', cursor: 'pointer' }}>
                   Annuler
                 </button>
-                <button type="submit" disabled={sending}
-                  className="flex items-center gap-2 px-7 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-colors">
-                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                <button type="submit" disabled={sending} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: sending ? '#86efac' : '#16a34a', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, color: 'white', cursor: sending ? 'not-allowed' : 'pointer' }}>
+                  {sending ? <Loader2 size={15} style={{ animation: 'spin 0.75s linear infinite' }} /> : <Send size={15} />}
                   {sending ? 'Enregistrement...' : 'Enregistrer le courrier entrant'}
                 </button>
               </div>
@@ -504,98 +453,110 @@ export const NouveauCourrierEntrantPage: React.FC = () => {
         </main>
       </div>
 
-      {/* ═══ MODAL AFFECTATION ═══ */}
+      {/* Modal Affectation */}
       {showAffectModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700">
-              <h3 className="text-base font-semibold text-white">Affecter le courrier</h3>
-              <button onClick={() => setShowAffectModal(false)} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(2px)', padding: 16 }}>
+          <div style={{ width: '100%', maxWidth: 480, background: 'white', borderRadius: 14, border: '1px solid #e5e7eb' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', borderBottom: '1px solid #f3f4f6' }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: 0 }}>Affecter le courrier</h3>
+              <button onClick={() => setShowAffectModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex' }}><X size={18} /></button>
             </div>
-            <div className="p-5 space-y-4">
+            <div style={{ padding: '20px 24px' }}>
               {loadingUsers ? (
-                <div className="flex items-center gap-2 text-slate-300 text-sm justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" /> Chargement...</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', padding: '20px 0', color: '#6b7280', fontSize: 13 }}>
+                  <Loader2 size={15} style={{ animation: 'spin 0.75s linear infinite' }} /> Chargement...
+                </div>
               ) : (
-                <div className="space-y-1.5 max-h-52 overflow-auto">
+                <div style={{ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 16 }}>
                   {usersForAssign.map(u => (
-                    <label key={u.id} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${selectedUserId === u.id ? 'bg-green-500/15 border border-green-500/30' : 'hover:bg-slate-800 border border-transparent'}`}>
-                      <input type="radio" checked={selectedUserId === u.id} onChange={() => setSelectedUserId(u.id)} className="accent-green-500" />
+                    <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 8, cursor: 'pointer', border: `1px solid ${selectedUserId === u.id ? '#bbf7d0' : 'transparent'}`, background: selectedUserId === u.id ? '#f0fdf4' : 'transparent' }}>
+                      <input type="radio" checked={selectedUserId === u.id} onChange={() => setSelectedUserId(u.id)} style={{ accentColor: '#16a34a' }} />
                       <div>
-                        <p className="text-white text-sm font-medium">{u.prenom} {u.nom}</p>
-                        <p className="text-slate-400 text-xs">{u.email} · {u.role}</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', margin: 0 }}>{u.prenom} {u.nom}</p>
+                        <p style={{ fontSize: 11, color: '#9ca3af', margin: '2px 0 0' }}>{u.email} · {u.role}</p>
                       </div>
                     </label>
                   ))}
                 </div>
               )}
-              <div>
-                <label className="block text-slate-300 text-xs font-semibold mb-1.5 uppercase tracking-wide">Commentaire (facultatif)</label>
-                <textarea value={assignComment} onChange={e => setAssignComment(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500" rows={3} />
-              </div>
+              <label style={{ ...S.lbl }}>Commentaire (facultatif)</label>
+              <textarea value={assignComment} onChange={e => setAssignComment(e.target.value)}
+                style={{ width: '100%', background: '#fafafa', border: '1px solid #e5e7eb', borderRadius: 7, padding: '9px 12px', fontSize: 13, color: '#111827', outline: 'none', boxSizing: 'border-box', resize: 'vertical', minHeight: 80 }} />
             </div>
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-700">
-              <button onClick={() => setShowAffectModal(false)} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-white transition-colors">Annuler</button>
-              <button onClick={addAffectation} className="px-5 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm text-white font-medium transition-colors flex items-center gap-2">
-                <Check className="w-4 h-4" /> Confirmer
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, padding: '14px 24px', borderTop: '1px solid #f3f4f6' }}>
+              <button onClick={() => setShowAffectModal(false)} style={{ padding: '8px 16px', background: '#f3f4f6', border: 'none', borderRadius: 7, fontSize: 13, fontWeight: 600, color: '#374151', cursor: 'pointer' }}>Annuler</button>
+              <button onClick={addAffectation} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px', background: '#16a34a', border: 'none', borderRadius: 7, fontSize: 13, fontWeight: 600, color: 'white', cursor: 'pointer' }}>
+                <Check size={14} /> Confirmer
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ═══ MODAL FICHE ═══ */}
+      {/* Modal Fiche */}
       {showFicheModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden" style={{ maxHeight: '90vh' }}>
-            <div className="bg-gradient-to-r from-green-700 to-emerald-700 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2"><FileText className="w-5 h-5" />Fiche de transmission</h3>
-              <div className="flex gap-2">
-                <button onClick={() => setFiche(FICHE_INITIALE)} type="button" className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-white text-sm">Réinitialiser</button>
-                <button onClick={() => setShowFicheModal(false)} className="text-white/80 hover:text-white"><X className="w-5 h-5" /></button>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)', padding: 16 }}>
+          <div style={{ width: '100%', maxWidth: 860, background: 'white', borderRadius: 14, overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', borderBottom: '1px solid #e5e7eb', background: 'white' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 32, height: 32, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FileText size={16} color="#16a34a" />
+                </div>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: 0 }}>Fiche de transmission</h3>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setFiche(FICHE_INITIALE)} type="button" style={{ padding: '6px 12px', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 6, fontSize: 12, color: '#374151', cursor: 'pointer' }}>Réinitialiser</button>
+                <button onClick={() => setShowFicheModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex' }}><X size={18} /></button>
               </div>
             </div>
-            <div className="p-6 bg-gray-50 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 130px)' }}>
-              <div className="mb-5 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Référence du document</label>
+
+            <div style={{ padding: 24, overflowY: 'auto', flex: 1, background: '#f9fafb' }}>
+              <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 8, padding: 16, marginBottom: 16 }}>
+                <label style={{ ...S.lbl }}>Référence du document</label>
                 <input name="reference" value={fiche.reference} onChange={handleFicheChange}
                   placeholder="Ex : N°2026/001/INSEED/DG"
-                  className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  style={{ ...S.inp, width: '100%' }} />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 {FICHE_SECTIONS.map(section => (
-                  <div key={section.label} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                    <h4 className="font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-100 flex items-center gap-2 text-sm">
-                      <span className={`w-2 h-2 ${section.color} rounded-full`}></span>{section.label}
-                    </h4>
-                    <div className="space-y-1.5">
+                  <div key={section.label} style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 8, padding: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid #f3f4f6' }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: section.color }} />
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#374151' }}>{section.label}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       {section.items.map(c => (
-                        <label key={c.name} className="flex items-center gap-2.5 p-1.5 hover:bg-gray-50 rounded-lg cursor-pointer">
+                        <label key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 6px', borderRadius: 5, cursor: 'pointer' }}>
                           <input type="checkbox" name={c.name} checked={(fiche as any)[c.name]} onChange={handleFicheChange}
-                            className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500" />
-                          <span className={`text-sm ${'color' in c ? c.color : 'text-gray-700'}`}>{c.label}</span>
+                            style={{ accentColor: section.color, width: 14, height: 14, flexShrink: 0 }} />
+                          <span style={{ fontSize: 12, color: 'color' in c ? c.color : '#374151', fontWeight: 'color' in c ? 600 : 400 }}>{c.label}</span>
                         </label>
                       ))}
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="mt-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Observations</label>
+
+              <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 8, padding: 16, marginTop: 12 }}>
+                <label style={{ ...S.lbl }}>Observations</label>
                 <textarea name="observation" value={fiche.observation} onChange={handleFicheChange} rows={4}
                   placeholder="Ajoutez vos observations..."
-                  className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none" />
+                  style={{ width: '100%', background: '#fafafa', border: '1px solid #e5e7eb', borderRadius: 7, padding: '9px 12px', fontSize: 13, color: '#111827', outline: 'none', boxSizing: 'border-box', resize: 'vertical' }} />
               </div>
             </div>
-            <div className="bg-gray-100 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
-              <button onClick={() => setShowFicheModal(false)} className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium">Annuler</button>
-              <button onClick={() => setShowFicheModal(false)} className="px-6 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
-                <Check className="w-4 h-4" /> Associer la fiche
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, padding: '14px 24px', borderTop: '1px solid #e5e7eb', background: 'white' }}>
+              <button onClick={() => setShowFicheModal(false)} style={{ padding: '9px 18px', background: 'white', border: '1px solid #e5e7eb', borderRadius: 7, fontSize: 13, fontWeight: 600, color: '#374151', cursor: 'pointer' }}>Annuler</button>
+              <button onClick={() => setShowFicheModal(false)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 20px', background: '#16a34a', border: 'none', borderRadius: 7, fontSize: 13, fontWeight: 600, color: 'white', cursor: 'pointer' }}>
+                <Check size={14} /> Associer la fiche
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };
